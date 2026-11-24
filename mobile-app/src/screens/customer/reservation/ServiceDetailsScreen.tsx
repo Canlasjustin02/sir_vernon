@@ -19,7 +19,7 @@ const ServiceDetailsScreen = () => {
     const { preSelectedId } = useLocalSearchParams<{ preSelectedId?: string }>();
     const reservation = useAppSelector((state) => state.reservation);
     const user = useAppSelector((state) => state.auth.user);
-    const { serviceId, weightKg, pickupAddress, deliveryAddress, pickupLat, pickupLng, deliveryLat, deliveryLng, serviceMode, selectedOptions } = reservation;
+    const { shopOwnerId, serviceId, weightKg, pickupAddress, deliveryAddress, pickupLat, pickupLng, deliveryLat, deliveryLng, serviceMode, selectedOptions } = reservation;
 
     const [services, setServices] = useState<Service[]>([]);
     const [options, setOptions] = useState<InventoryItem[]>([]);
@@ -33,15 +33,19 @@ const ServiceDetailsScreen = () => {
     const fetchInitialData = async () => {
         try {
             setLoading(true);
-            const [servicesData, detergentData, softenerData, finishingData] = await Promise.all([
-                reservationService.getServices(),
+            const servicesData = await reservationService.getServices();
+            setServices(servicesData);
+            setLoading(false);
+
+            const inventoryResults = await Promise.allSettled([
                 reservationService.getInventoryByCategory('DETERGENT'),
                 reservationService.getInventoryByCategory('SOFTENER'),
                 reservationService.getInventoryByCategory('FINISHING')
             ]);
-
-            setServices(servicesData);
-            setOptions([...detergentData, ...softenerData, ...finishingData]);
+            setOptions(inventoryResults.flatMap((result) => result.status === 'fulfilled' ? result.value : []));
+            if (inventoryResults.some((result) => result.status === 'rejected')) {
+                notify.error('Some add-ons unavailable', 'Service offerings are loaded, but some optional add-ons could not be fetched.');
+            }
 
             if (preSelectedId && !serviceId) {
                 dispatch(setServiceId(preSelectedId));
@@ -79,6 +83,7 @@ const ServiceDetailsScreen = () => {
     const totals = calculateTotals();
 
     const handleConfirm = async () => {
+        if (!shopOwnerId) return notify.error('Select a shop', 'Please choose a laundry shop before making a reservation.');
         if (!serviceId) return notify.error('Error', 'Please select a service');
         if (!weightKg || weightKg <= 0) return notify.error('Error', 'Please enter a valid weight');
         if (serviceMode === 'PICKUP_DELIVERY' && (!pickupAddress || !deliveryAddress)) {
@@ -89,6 +94,7 @@ const ServiceDetailsScreen = () => {
             setSubmitting(true);
             const orderData = {
                 serviceId,
+                shopOwnerId,
                 serviceMode,
                 weightKg,
                 pickupAddress,
@@ -98,7 +104,7 @@ const ServiceDetailsScreen = () => {
                 deliveryLat,
                 deliveryLng,
                 options: selectedOptions.map(o => o.inventoryId),
-                paymentMethod: 'NONE',
+                paymentMethod: reservation.paymentMethod || 'COD',
                 subtotal: totals.subtotal + totals.optionsTotal,
                 deliveryFee: totals.deliveryFee,
                 totalAmount: totals.total,
@@ -136,7 +142,7 @@ const ServiceDetailsScreen = () => {
                 {submitting ? (
                     <ActivityIndicator color={COLORS.WHITE} />
                 ) : (
-                    <Text style={commonStyles.primaryButtonText}>Place Order • Rs.{(totals.total || 0).toFixed(2)}</Text>
+                    <Text style={commonStyles.primaryButtonText}>Place Order • ₱{(totals.total || 0).toFixed(2)}</Text>
                 )}
             </TouchableOpacity>
         </View>
@@ -169,7 +175,7 @@ const ServiceDetailsScreen = () => {
                                         onPress={() => dispatch(setServiceId(item._id))}
                                     >
                                         <Text style={[styles.serviceName, isSelected && styles.serviceNameActive]} numberOfLines={1}>{item.name}</Text>
-                                        <Text style={styles.servicePrice}>Rs.{item.price}/{item.unit?.toLowerCase() || 'kg'}</Text>
+                                        <Text style={styles.servicePrice}>₱{item.price}/{item.unit?.toLowerCase() || 'kg'}</Text>
                                         {isSelected && (
                                             <View style={styles.selectedBadge}><View style={styles.selectedDot} /></View>
                                         )}
@@ -209,7 +215,7 @@ const ServiceDetailsScreen = () => {
 
                             <TouchableOpacity
                                 style={[styles.input, { justifyContent: 'center', height: 'auto', minHeight: 60, paddingVertical: 12, marginBottom: 12 }]}
-                                onPress={() => router.push('/(protected)/(customer)/reservation/address')}
+                                onPress={() => router.push({ pathname: '/(protected)/(customer)/reservation/address', params: { type: 'pickup' } })}
                             >
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     <View style={{ flex: 1 }}>
@@ -224,7 +230,7 @@ const ServiceDetailsScreen = () => {
 
                             <TouchableOpacity
                                 style={[styles.input, { justifyContent: 'center', height: 'auto', minHeight: 60, paddingVertical: 12 }]}
-                                onPress={() => router.push('/(protected)/(customer)/reservation/address')}
+                                onPress={() => router.push({ pathname: '/(protected)/(customer)/reservation/address', params: { type: 'delivery' } })}
                             >
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     <View style={{ flex: 1 }}>
@@ -257,7 +263,7 @@ const ServiceDetailsScreen = () => {
                                         }))}
                                     >
                                         <Text style={[styles.chipText, isSelected && styles.chipTextActive]}>{item.name}</Text>
-                                        {isSelected && <Text style={styles.chipTextActive}>+Rs.{item.unitPrice}</Text>}
+                                        {isSelected && <Text style={styles.chipTextActive}>+₱{item.unitPrice}</Text>}
                                     </TouchableOpacity>
                                 );
                             })}
@@ -280,24 +286,24 @@ const ServiceDetailsScreen = () => {
                         <Text style={[styles.sectionTitle, { fontSize: 16 }]}>Price Summary</Text>
                         <View style={styles.summaryRow}>
                             <Text style={styles.summaryLabel}>Base Service ({weightKg || 1}{selectedService?.unit?.toLowerCase() || 'kg'})</Text>
-                            <Text style={styles.summaryValue}>Rs.{(totals.subtotal || 0).toFixed(2)}</Text>
+                            <Text style={styles.summaryValue}>₱{(totals.subtotal || 0).toFixed(2)}</Text>
                         </View>
                         {selectedOptions.length > 0 && (
                             <View style={styles.summaryRow}>
                                 <Text style={styles.summaryLabel}>Additional Options ({selectedOptions.length})</Text>
-                                <Text style={styles.summaryValue}>Rs.{(totals.optionsTotal || 0).toFixed(2)}</Text>
+                                <Text style={styles.summaryValue}>₱{(totals.optionsTotal || 0).toFixed(2)}</Text>
                             </View>
                         )}
                         {totals.deliveryFee > 0 && (
                             <View style={styles.summaryRow}>
                                 <Text style={styles.summaryLabel}>Delivery Fee</Text>
-                                <Text style={styles.summaryValue}>Rs.{(totals.deliveryFee || 0).toFixed(2)}</Text>
+                                <Text style={styles.summaryValue}>₱{(totals.deliveryFee || 0).toFixed(2)}</Text>
                             </View>
                         )}
                         <View style={styles.divider} />
                         <View style={styles.totalRow}>
                             <Text style={styles.totalLabel}>Total Estimate</Text>
-                            <Text style={styles.totalValue}>Rs.{(totals.total || 0).toFixed(2)}</Text>
+                            <Text style={styles.totalValue}>₱{(totals.total || 0).toFixed(2)}</Text>
                         </View>
                     </View>
                 </View>

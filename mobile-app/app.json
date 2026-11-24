@@ -14,7 +14,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vinodrajapaksha.bnwlaundry",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -35,13 +39,19 @@
     "plugins": [
       "expo-router",
       "expo-font",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-sharing",
+      "expo-status-bar"
     ],
     "extra": {
-      "eas": {
-        "projectId": "2e786955-cf3d-4e9d-a652-5ec1187145b6"
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
       },
-      "router": {}
+      "eas": {
+        "projectId": "f2b88a20-e63c-4832-8ea5-502ce3b6580b"
+      }
     }
   }
 }
