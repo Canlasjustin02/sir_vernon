@@ -16,11 +16,12 @@ export const ProfileInfo = ({ profile, onSave, onAvatarUpload, loading }: Profil
     name: profile.name,
     email: profile.email,
     phone: profile.phone || "",
-    avatar: profile.avatar || "",
   });
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
     const file = e.target.files?.[0];
+    input.value = "";
     if (file) {
       await onAvatarUpload(file);
     }
@@ -43,22 +44,25 @@ export const ProfileInfo = ({ profile, onSave, onAvatarUpload, loading }: Profil
             accept="image/*"
             onChange={handleFileChange}
           />
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl relative cursor-pointer"
-          >
-            {formData.avatar ? (
-              <img src={formData.avatar} alt="Avatar" className="w-full h-full object-cover" />
+          <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl relative">
+            {profile.avatar ? (
+              <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-slate-50 flex items-center justify-center text-slate-300">
                 <User size={40} />
               </div>
             )}
-            <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <CloudUpload className="text-white" size={24} />
-            </div>
           </div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center mt-4">Identity Visualization</p>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => fileInputRef.current?.click()}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2 text-xs font-bold text-blue-600 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <CloudUpload size={16} />
+            {loading ? "Uploading..." : profile.avatar ? "Change photo" : "Upload photo"}
+          </button>
+          <p className="mt-2 text-[10px] text-slate-400">Image files up to 5 MB</p>
         </div>
 
         {/* Info Grid */}

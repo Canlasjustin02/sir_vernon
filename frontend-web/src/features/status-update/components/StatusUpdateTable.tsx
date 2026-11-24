@@ -51,7 +51,7 @@ export const StatusUpdateTable = ({ orders, onUpdateStatus }: StatusUpdateTableP
               {order.serviceId?.name || "Laundry"}
             </span>
           </div>
-          <p className="text-[10px] font-bold text-slate-900 mt-1">LKR {order.totalAmount.toLocaleString()}</p>
+          <p className="text-[10px] font-bold text-slate-900 mt-1">₱{order.totalAmount.toLocaleString()}</p>
         </div>
       ),
     },

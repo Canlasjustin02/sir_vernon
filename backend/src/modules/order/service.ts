@@ -5,6 +5,7 @@ import Service from '../../database/models/Service.js';
 import Inventory from '../../database/models/Inventory.js';
 import CashOnDelivery from '../../database/models/CashOnDelivery.js';
 import Payment from '../../database/models/Payment.js';
+import User from '../../database/models/User.js';
 import ApiError from '../../core/apiError.js';
 import {
   PAYMENT_STATUS,
@@ -24,6 +25,8 @@ import { createNotification } from '../notification/service.js';
 
 interface CreateOrderInput {
   serviceId: string;
+  shopOwnerId?: string;
+  serviceMode?: 'PICKUP_DELIVERY' | 'SELF_SERVICE';
   weightKg?: number;
   reservedDateTime?: Date;
   pickupAddress?: string;
@@ -43,6 +46,13 @@ export const createOrder = async (userId: string, input: CreateOrderInput) => {
   const service = await Service.findById(input.serviceId);
   if (!service) {
     throw new ApiError(404, 'Service not found');
+  }
+
+  const shopOwner = input.shopOwnerId
+    ? await User.findOne({ _id: input.shopOwnerId, role: ROLES.ADMIN, isActive: true })
+    : null;
+  if (input.shopOwnerId && !shopOwner) {
+    throw new ApiError(404, 'Laundry shop not found');
   }
 
   const subtotal = service.price * (input.weightKg || 1);
@@ -83,7 +93,9 @@ export const createOrder = async (userId: string, input: CreateOrderInput) => {
   const order = await Order.create({
     orderNo,
     userId,
+    shopOwnerId: shopOwner?._id ?? null,
     serviceId: input.serviceId,
+    serviceMode: input.serviceMode || 'PICKUP_DELIVERY',
     weightKg: input.weightKg,
     status: ORDER_STATUS.ORDER_PLACED,
     reservedDateTime: input.reservedDateTime,
@@ -105,9 +117,8 @@ export const createOrder = async (userId: string, input: CreateOrderInput) => {
 
   if (order.paymentMethod !== PAYMENT_METHODS.NONE) {
     try {
-      const User = await import('../../database/models/User.js').then(m => m.default);
-      const admins = await User.find({ role: ROLES.ADMIN });
-      for (const admin of admins) {
+      const recipients = shopOwner ? [shopOwner] : await User.find({ role: ROLES.ADMIN });
+      for (const admin of recipients) {
         await createNotification(admin._id.toString(), {
           title: 'New Order Received',
           message: `A new order ${order.orderNo} has been placed by a customer.`,
@@ -123,9 +134,12 @@ export const createOrder = async (userId: string, input: CreateOrderInput) => {
   return order;
 };
 
-export const claimOrder = async (orderId: string, staffId: string) => {
+export const claimOrder = async (orderId: string, staffId: string, role: string) => {
   const order = await Order.findById(orderId);
   if (!order) throw new ApiError(404, 'Order not found');
+  if (role === ROLES.ADMIN && order.shopOwnerId?.toString() !== staffId) {
+    throw new ApiError(404, 'Order not found');
+  }
 
   if (order.staffId) {
     throw new ApiError(400, 'Order already assigned to another rider');
@@ -154,7 +168,7 @@ export const claimOrder = async (orderId: string, staffId: string) => {
   return order;
 };
 
-export const getAvailableOrders = async (query: any) => {
+export const getAvailableOrders = async (query: any, ownerId: string, role: string) => {
   const { page, limit } = query;
   const p = parseInt(page as string) || DEFAULT_PAGINATION.PAGE;
   const l = parseInt(limit as string) || DEFAULT_PAGINATION.LIMIT;
@@ -170,6 +184,7 @@ export const getAvailableOrders = async (query: any) => {
     ],
     paymentMethod: { $ne: PAYMENT_METHODS.NONE }
   };
+  if (role === ROLES.ADMIN) filter.shopOwnerId = ownerId;
 
   const [orders, total] = await Promise.all([
     Order.find(filter)
@@ -259,13 +274,26 @@ export const notifyArrival = async (orderId: string, staffId: string) => {
   return { success: true };
 };
 
-export const updateOrderStatus = async (id: string, status: string, updateBy: string) => {
+export const updateOrderStatus = async (
+  id: string,
+  status: string,
+  updateBy: string,
+  role: string
+) => {
   const updateData: any = { status, updateBy };
 
   const orderToUpdate = await Order.findById(id);
   if (!orderToUpdate) throw new ApiError(404, 'Order not found');
+  if (role === ROLES.ADMIN && orderToUpdate.shopOwnerId?.toString() !== updateBy) {
+    throw new ApiError(404, 'Order not found');
+  }
 
-  if (status === ORDER_STATUS.PICKED_UP && orderToUpdate.paymentMethod === PAYMENT_METHODS.COD) {
+  const isSelfServiceDropOff = orderToUpdate.serviceMode === 'SELF_SERVICE';
+  if (
+    (status === ORDER_STATUS.PICKED_UP ||
+      (isSelfServiceDropOff && status === ORDER_STATUS.HANDED_OVER)) &&
+    orderToUpdate.paymentMethod === PAYMENT_METHODS.COD
+  ) {
     updateData.paymentStatus = PAYMENT_STATUS.PAID;
     updateData.paidAt = new Date();
 
@@ -299,7 +327,9 @@ export const updateOrderStatus = async (id: string, status: string, updateBy: st
   }
 
   if (status === ORDER_STATUS.HANDED_OVER) {
-    updateData.staffId = null;
+    updateData.staffId = isSelfServiceDropOff ? updateBy : null;
+  } else if (isSelfServiceDropOff && status === ORDER_STATUS.DELIVERED) {
+    updateData.staffId = updateBy;
   }
 
   const order = await Order.findByIdAndUpdate(
@@ -376,11 +406,11 @@ export const cancelOrder = async (id: string, userId: string) => {
   return order;
 };
 
-export const getOrderById = async (id: string) => {
+export const getOrderById = async (id: string, userId: string, role: string) => {
   const order = await Order.findById(id)
     .populate('userId', 'name email telephone')
     .populate('serviceId', 'name price');
-  if (!order) {
+  if (!order || (role === ROLES.ADMIN && order.shopOwnerId?.toString() !== userId)) {
     throw new ApiError(404, 'Order not found');
   }
   return order;
@@ -423,13 +453,14 @@ export const getMyOrders = async (userId: string, query: any) => {
   };
 };
 
-export const getAllOrders = async (query: any) => {
+export const getAllOrders = async (query: any, ownerId: string, role: string) => {
   const { status, userId, page, limit } = query;
   const p = parseInt(page as string) || DEFAULT_PAGINATION.PAGE;
   const l = parseInt(limit as string) || DEFAULT_PAGINATION.LIMIT;
   const skip = (p - 1) * l;
 
   const filter: any = { isActive: true };
+  if (role === ROLES.ADMIN) filter.shopOwnerId = ownerId;
   if (status) filter.status = status;
   if (userId) filter.userId = userId;
 
@@ -439,7 +470,8 @@ export const getAllOrders = async (query: any) => {
       .skip(skip)
       .limit(l)
       .populate('userId', 'name')
-      .populate('serviceId', 'name'),
+      .populate('serviceId', 'name')
+      .populate('shopOwnerId', 'name address telephone'),
     Order.countDocuments(filter),
   ]);
 
@@ -564,8 +596,8 @@ export const generateReceiptPdf = async (id: string): Promise<Buffer> => {
       .font('Helvetica')
       .text((order.serviceId as any)?.name || 'Laundry Service', 50, position)
       .text(`${order.weightKg || 1} kg`, 280, position, { width: 90, align: 'right' })
-      .text(`LKR ${(order.subtotal / (order.weightKg || 1)).toFixed(2)}`, 370, position, { width: 90, align: 'right' })
-      .text(`LKR ${order.subtotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
+      .text(`₱${(order.subtotal / (order.weightKg || 1)).toFixed(2)}`, 370, position, { width: 90, align: 'right' })
+      .text(`₱${order.subtotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
 
     if (order.options && order.options.length > 0) {
       order.options.forEach((opt: any) => {
@@ -573,7 +605,7 @@ export const generateReceiptPdf = async (id: string): Promise<Buffer> => {
         doc
           .fontSize(9)
           .text(`+ ${opt.name} (${opt.categoryName})`, 70, position)
-          .text(`LKR ${opt.price.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
+          .text(`₱${opt.price.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
       });
     }
 
@@ -587,24 +619,24 @@ export const generateReceiptPdf = async (id: string): Promise<Buffer> => {
     doc
       .fontSize(10)
       .text('Subtotal:', 350, position)
-      .text(`LKR ${order.subtotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
+      .text(`₱${order.subtotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
 
     position += 15;
     doc
       .text('Extra Fees:', 350, position)
-      .text(`LKR ${order.extraFee.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
+      .text(`₱${order.extraFee.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
 
     position += 15;
     doc
       .text('Delivery Fee:', 350, position)
-      .text(`LKR ${order.deliveryFee.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
+      .text(`₱${order.deliveryFee.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
 
     if ((order.discountTotal || 0) > 0) {
       position += 15;
       doc
         .fillColor('#EE5555')
         .text('Discount:', 350, position)
-        .text(`- LKR ${order.discountTotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' })
+        .text(`- ₱${order.discountTotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' })
         .fillColor('#000000');
     }
 
@@ -613,7 +645,7 @@ export const generateReceiptPdf = async (id: string): Promise<Buffer> => {
       .font('Helvetica-Bold')
       .fontSize(14)
       .text('TOTAL:', 350, position)
-      .text(`LKR ${order.totalAmount.toFixed(2)}`, 450, position, { width: 100, align: 'right' });
+      .text(`₱${order.totalAmount.toFixed(2)}`, 450, position, { width: 100, align: 'right' });
 
     doc
       .font('Helvetica')
@@ -623,7 +655,19 @@ export const generateReceiptPdf = async (id: string): Promise<Buffer> => {
     doc.end();
   });
 };
-export const updateAnyOrder = async (id: string, updateData: any) => {
+export const updateAnyOrder = async (
+  id: string,
+  updateData: any,
+  userId: string,
+  role: string
+) => {
+  if (role === ROLES.ADMIN) {
+    const existingOrder = await Order.findById(id).select('shopOwnerId');
+    if (!existingOrder || existingOrder.shopOwnerId?.toString() !== userId) {
+      throw new ApiError(404, 'Order not found');
+    }
+  }
+
   const order = await Order.findByIdAndUpdate(
     id,
     { $set: updateData },
@@ -638,7 +682,14 @@ export const updateAnyOrder = async (id: string, updateData: any) => {
   return order;
 };
 
-export const softDeleteOrder = async (id: string) => {
+export const softDeleteOrder = async (id: string, userId: string, role: string) => {
+  if (role === ROLES.ADMIN) {
+    const existingOrder = await Order.findById(id).select('shopOwnerId');
+    if (!existingOrder || existingOrder.shopOwnerId?.toString() !== userId) {
+      throw new ApiError(404, 'Order not found');
+    }
+  }
+
   const order = await Order.findByIdAndUpdate(
     id,
     { $set: { isActive: false } },

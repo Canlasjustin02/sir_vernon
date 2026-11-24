@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import * as authService from "./service.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 import { ApiResponse } from "../../core/apiResponse.js";
-import { Role } from "../../core/constants.js";
 
 type RegisterBody = {
   name: string;
@@ -10,7 +9,6 @@ type RegisterBody = {
   telephone: string;
   address?: string;
   password: string;
-  role: Role;
 };
 
 type LoginBody = {
@@ -24,7 +22,7 @@ type RefreshBody = {
 
 export const register = asyncHandler(
   async (req: Request<{}, {}, RegisterBody>, res: Response) => {
-    const { name, email, telephone, address, password, role } = req.body;
+    const { name, email, telephone, address, password } = req.body;
 
     const user = await authService.register({
       name,
@@ -32,10 +30,16 @@ export const register = asyncHandler(
       telephone,
       address,
       password,
-      role,
     });
 
     return ApiResponse(res, 201, "User registered successfully", user);
+  }
+);
+
+export const registerOwner = asyncHandler(
+  async (req: Request<{}, {}, RegisterBody>, res: Response) => {
+    const user = await authService.registerOwner(req.body);
+    return ApiResponse(res, 201, "Owner registered successfully", user);
   }
 );
 

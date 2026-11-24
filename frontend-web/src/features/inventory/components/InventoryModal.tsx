@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X, Package, Save, AlertCircle, Loader2 } from "lucide-react";
+import { X, Package, Save, AlertCircle, Loader2, ImagePlus } from "lucide-react";
 import type { InventoryItem } from "../types";
 import { inventorySchema, type InventoryInput } from "../../../validation/inventory.schema";
 import { categoryApi } from "../../category/api/category.api";
@@ -14,7 +14,7 @@ interface InventoryModalProps {
   item: InventoryItem | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: Partial<InventoryItem>) => void;
+  onSave: (data: Partial<InventoryItem>, imageFile?: File | null) => void;
   loading?: boolean;
 }
 
@@ -22,6 +22,8 @@ export default function InventoryModal({ item, isOpen, onClose, onSave, loading 
   const [categories, setCategories] = useState<InventoryCategory[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [fetchingData, setFetchingData] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const {
     register,
@@ -41,6 +43,7 @@ export default function InventoryModal({ item, isOpen, onClose, onSave, loading 
       batchQty: 10,
       isActive: true,
       supplierId: "",
+      imageUrl: "",
     },
   });
 
@@ -79,9 +82,12 @@ export default function InventoryModal({ item, isOpen, onClose, onSave, loading 
         qtyInStock: item.qtyInStock,
         reorderLevel: item.reorderLevel,
         batchQty: item.batchQty || 0,
-        supplierId: typeof item.supplierId === 'object' ? (item.supplierId as any)._id : item.supplierId,
+        supplierId: typeof item.supplierId === "object" ? (item.supplierId as any)._id : item.supplierId || "",
         isActive: item.isActive,
+        imageUrl: item.imageUrl || "",
       });
+      setImageFile(null);
+      setImagePreview(item.imageUrl || null);
     } else {
       reset({
         name: "",
@@ -93,47 +99,93 @@ export default function InventoryModal({ item, isOpen, onClose, onSave, loading 
         batchQty: 10,
         isActive: true,
         supplierId: "",
+        imageUrl: "",
       });
+      setImageFile(null);
+      setImagePreview(null);
     }
   }, [item, isOpen, categories, reset]);
 
+  useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
+
   if (!isOpen) return null;
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    if (imagePreview && imagePreview.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const onSubmit = (data: InventoryInput) => {
-    onSave(data as any);
+    onSave(data as any, imageFile);
   };
 
   return (
     <>
       <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity" onClick={onClose} />
       <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-50 overflow-y-auto font-poppins animate-in slide-in-from-right duration-300">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col min-h-full">
           {/* HEADER */}
-          <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-600 text-white rounded-2xl">
+          <div className="p-5 sm:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-3 bg-blue-600 text-white rounded-2xl shrink-0">
                 <Package size={20} />
               </div>
-              <div>
-                <h2 className="text-xl font-black text-slate-900 leading-none">{item ? 'Edit Item' : 'New Stock Item'}</h2>
+              <div className="min-w-0">
+                <h2 className="text-xl font-black text-slate-900 leading-none truncate">{item ? 'Edit Item' : 'New Stock Item'}</h2>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Inventory Management</p>
               </div>
             </div>
-            <button type="button" onClick={onClose} className="p-2 hover:bg-slate-200 rounded-xl transition text-slate-400">
+            <button type="button" onClick={onClose} className="p-2 hover:bg-slate-200 rounded-xl transition text-slate-400 shrink-0">
               <X size={20} />
             </button>
           </div>
 
           {/* FORM */}
-          <div className="p-8 grid gap-6 relative">
+          <div className="p-5 sm:p-8 grid gap-6 relative flex-1">
             {fetchingData && (
               <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center">
                 <Loader2 className="animate-spin text-blue-600" size={32} />
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Item Picture</label>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="w-20 h-20 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Inventory item" className="w-full h-full object-cover" />
+                  ) : (
+                    <Package size={24} className="text-slate-300" />
+                  )}
+                </div>
+                <label className="w-full sm:flex-1 cursor-pointer">
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                  <div className="px-4 py-3.5 bg-slate-50 border border-dashed border-slate-300 rounded-2xl hover:bg-slate-100 transition flex items-center justify-center gap-2 text-sm font-bold text-slate-600 text-center">
+                    <ImagePlus size={16} />
+                    {imagePreview ? "Change Picture" : "Upload Picture"}
+                  </div>
+                </label>
+              </div>
+              <p className="text-[10px] text-slate-400 mt-2 ml-1">Optional. JPG/PNG image for this inventory item.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Item Display Name</label>
                 <input
                   className={`w-full px-4 py-3.5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500/20 transition font-bold text-slate-700 ${errors.name ? 'ring-2 ring-red-500/50' : ''}`}
@@ -171,7 +223,7 @@ export default function InventoryModal({ item, isOpen, onClose, onSave, loading 
                 </select>
               </div>
 
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Supplier</label>
                 <select
                   className={`w-full px-4 py-3.5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500/20 transition font-bold text-slate-700 ${errors.supplierId ? 'ring-2 ring-red-500/50' : ''}`}
@@ -186,9 +238,9 @@ export default function InventoryModal({ item, isOpen, onClose, onSave, loading 
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Price (LKR)</label>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Price (₱)</label>
                 <input
                   type="number"
                   className={`w-full px-4 py-3.5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500/20 transition font-bold text-slate-700 ${errors.unitPrice ? 'ring-2 ring-red-500/50' : ''}`}
@@ -232,18 +284,18 @@ export default function InventoryModal({ item, isOpen, onClose, onSave, loading 
           </div>
 
           {/* ACTIONS */}
-          <div className="mt-auto p-8 border-t border-slate-100 flex gap-4 bg-slate-50/30">
+          <div className="mt-auto p-5 sm:p-8 border-t border-slate-100 flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 bg-slate-50/30">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-4 bg-white border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-100 transition"
+              className="flex-1 py-3.5 sm:py-4 bg-white border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-100 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || fetchingData}
-              className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+              className="flex-1 py-3.5 sm:py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
               {item ? 'Update Item' : 'Create Item'}

@@ -13,6 +13,7 @@ export const inventorySchema = z.object({
   batchQty: z.number().nonnegative("Batch quantity must be non-negative"),
   supplierId: z.string().min(1, "Supplier is required"),
   isActive: z.boolean(),
+  imageUrl: z.string().optional().nullable(),
 });
 
 export type InventoryInput = z.infer<typeof inventorySchema>;

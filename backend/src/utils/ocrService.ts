@@ -32,7 +32,7 @@ export const processSlipOCR = async (
     let extractedAccount: string | undefined;
 
     // Amount Extraction
-    const amountRegex = /(?:RS|LKR|AMT|AMOUNT|TOTAL)[:.\s]*([\d,]+\.\d{2})/i;
+    const amountRegex = /(?:₱|PHP|PESO|PESOS|AMT|AMOUNT|TOTAL)[:.\s]*([\d,]+\.\d{2})/i;
     const amountMatch = text.match(amountRegex);
     if (amountMatch) {
       extractedAmount = parseFloat(amountMatch[1].replace(/,/g, ''));

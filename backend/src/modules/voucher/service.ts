@@ -45,7 +45,7 @@ export const validateVoucher = async (code: string, userId: string, orderAmount:
     const level = user.membership.level;
     // If not BRONZE, block voucher usage
     if (level !== LOYALTY_TIER_NAME.BRONZE && level !== 'null' && level !== null) {
-      throw new ApiError(403, 'Vouchers are only available for Bronze members. Premium tiers already receive automatic loyalty discounts.');
+      throw new ApiError(403, 'Vouchers are only available for Bronze membersPremium tiers already receive automatic loyalty discounts.');
     }
   }
 
@@ -57,7 +57,7 @@ export const validateVoucher = async (code: string, userId: string, orderAmount:
 
   // Min amount validation
   if (orderAmount < voucher.minOrderAmount) {
-    throw new ApiError(400, `Minimum order amount for this voucher is LKR ${voucher.minOrderAmount}`);
+    throw new ApiError(400, `Minimum order amount for this voucher is ₱${voucher.minOrderAmount}`);
   }
 
   // Total usage limit

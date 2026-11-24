@@ -20,14 +20,14 @@ export const getPayHereHashHandler = asyncHandler(async (req: AuthRequest, res: 
   const order = await Order.findOne({ orderNo });
   if (!order) throw new ApiError(404, 'Order not found');
 
-  const hash = generatePayHereHash(orderNo, order.totalAmount, 'LKR');
+  const hash = generatePayHereHash(orderNo, order.totalAmount, 'PHP');
 
   return ApiResponse(res, 200, 'Hash generated successfully', {
     hash,
     merchantId: env.PAYHERE_MERCHANT_ID,
     appId: env.PAYHERE_APP_ID,
     amount: order.totalAmount.toFixed(2),
-    currency: 'LKR',
+    currency: 'PHP',
   });
 });
 
@@ -42,7 +42,7 @@ export const getPayHerePreApprovalHashHandler = asyncHandler(async (req: AuthReq
   if (!user) throw new ApiError(404, 'User not found');
 
   const amount = 30.00;
-  const currency = 'LKR';
+  const currency = 'PHP';
   const hash = generatePayHereHash(orderNo, amount, currency);
 
   const [firstName, ...rest] = user.name.split(' ');
@@ -52,7 +52,7 @@ export const getPayHerePreApprovalHashHandler = asyncHandler(async (req: AuthReq
     hash,
     merchantId: env.PAYHERE_MERCHANT_ID,
     amount: "30.00",
-    currency: "LKR",
+    currency: "PHP",
     orderId: orderNo,
     customer: {
       firstName: firstName,

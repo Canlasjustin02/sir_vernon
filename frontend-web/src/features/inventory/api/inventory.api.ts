@@ -39,3 +39,13 @@ export const restockItem = async (id: string, qty?: number) => {
         body: JSON.stringify({ qty }),
     });
 };
+
+export const uploadInventoryImage = async (id: string, file: File) => {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  return apiFetch<InventoryItem>(`/inventory/${id}/image`, {
+    method: "POST",
+    body: formData,
+  });
+};

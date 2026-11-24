@@ -39,7 +39,7 @@ export const ConsolidatedLedgerDrawer = ({ payment, onClose }: ConsolidatedLedge
           <div className="flex-1 p-8 space-y-10">
             <div className="text-center p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Transfer Amount</p>
-              <h3 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter">LKR {payment.amount.toLocaleString()}</h3>
+              <h3 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter">₱{payment.amount.toLocaleString()}</h3>
               <div className={`mx-auto w-fit px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${payment.status === 'PAID' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'
                 }`}>
                 {payment.status}

@@ -8,6 +8,8 @@ import {
   Shirt,
   Pocket,
   Diamond,
+  MapPin,
+  Store,
 } from 'lucide-react-native';
 import ScreenWrapper from '../../../components/common/ScreenWrapper';
 import Button from '../../../components/common/Button';
@@ -20,6 +22,7 @@ import { Order } from '../../../types/order.types';
 import { useAppSelector } from '../../../store/hooks';
 import FeedbackModal from '../../../components/customer/FeedbackModal';
 import Avatar from '../../../components/common/Avatar';
+import { shopService, LaundryShop } from '../../../services/customer/shopService';
 
 const SERVICES = [
   { id: '1', name: 'Wash & Fold', desc: 'Everyday Items', icon: WashingMachine },
@@ -36,6 +39,9 @@ const CustomerHomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [feedbackOrder, setFeedbackOrder] = useState<Order | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [shops, setShops] = useState<LaundryShop[]>([]);
+  const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
+  const [loadingShops, setLoadingShops] = useState(true);
 
   const fetchActiveOrder = async () => {
     try {
@@ -61,12 +67,31 @@ const CustomerHomeScreen = () => {
 
   useEffect(() => {
     fetchActiveOrder();
+    shopService.getAvailableShops()
+      .then((availableShops) => {
+        setShops(availableShops);
+        setSelectedShopId(availableShops[0]?._id ?? null);
+      })
+      .catch((error) => console.error('Failed to fetch laundry shops:', error))
+      .finally(() => setLoadingShops(false));
   }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
     fetchActiveOrder();
+    shopService.getAvailableShops()
+      .then(setShops)
+      .catch((error) => console.error('Failed to refresh laundry shops:', error));
   };
+
+  const startReservation = (shopOwnerId: string) => {
+    router.push({
+      pathname: '/(protected)/(customer)/reservation/service-mode',
+      params: { shopOwnerId },
+    });
+  };
+
+  const selectedShop = shops.find((shop) => shop._id === selectedShopId) ?? shops[0];
 
   if (loading) return <Loading fullScreen />;
 
@@ -95,8 +120,9 @@ const CustomerHomeScreen = () => {
   const footer = (
     <View style={styles.footer}>
       <Button
-        title="Make a Reservation"
-        onPress={() => router.push('/(protected)/(customer)/reservation/service-mode')}
+        title={selectedShop ? `Book at ${selectedShop.name}` : 'No shops available'}
+        onPress={() => selectedShop && startReservation(selectedShop._id)}
+        disabled={!selectedShop}
         size="xl"
         style={styles.reservationButton}
       />
@@ -170,6 +196,54 @@ const CustomerHomeScreen = () => {
           </View>
         )}
 
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Available laundry shops</Text>
+        </View>
+        {loadingShops ? (
+          <Text style={{ color: COLORS.TEXT_SECONDARY, marginBottom: 20 }}>Loading nearby shops...</Text>
+        ) : shops.length === 0 ? (
+          <View style={[styles.trackingCard, { marginTop: 0 }]}>
+            <Text style={styles.trackingSubtitle}>No laundry shops are available yet.</Text>
+          </View>
+        ) : (
+          <View style={{ marginBottom: 12 }}>
+            {shops.map((shop) => (
+              <View
+                key={shop._id}
+                style={{
+                  backgroundColor: selectedShopId === shop._id ? COLORS.PRIMARY_SOFT : COLORS.WHITE,
+                  borderColor: selectedShopId === shop._id ? COLORS.PRIMARY : COLORS.BORDER_LIGHT,
+                  borderWidth: 1,
+                  borderRadius: 16,
+                  padding: 16,
+                  marginBottom: 12,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => setSelectedShopId(shop._id)}
+                  style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 }}
+                >
+                  <Store color={COLORS.PRIMARY} size={20} />
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={{ color: COLORS.TEXT_PRIMARY, fontSize: 16, fontWeight: '700' }}>{shop.name}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginTop: 6 }}>
+                      <MapPin color={COLORS.TEXT_MUTED} size={15} />
+                      <Text style={{ flex: 1, marginLeft: 6, color: COLORS.TEXT_SECONDARY, fontSize: 12 }}>
+                        {shop.address || 'Address not provided'}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+                <Button
+                  title="Book this shop"
+                  onPress={() => startReservation(shop._id)}
+                  size="md"
+                />
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* Services Section */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Our Services</Text>
@@ -181,7 +255,8 @@ const CustomerHomeScreen = () => {
               key={service.id}
               style={styles.serviceCard}
               activeOpacity={0.7}
-              onPress={() => router.push('/(protected)/(customer)/reservation/service-mode')}
+              disabled={!selectedShop}
+              onPress={() => selectedShop && startReservation(selectedShop._id)}
             >
               <View style={styles.serviceIconContainer}>
                 <service.icon color={COLORS.PRIMARY} size={28} />

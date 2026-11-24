@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import * as Notifications from 'expo-notifications';
+import { isRunningInExpoGo } from 'expo';
+import type * as Notifications from 'expo-notifications';
 import {
   registerForPushNotificationsAsync,
   updatePushTokenOnServer,
@@ -16,32 +17,45 @@ export const NotificationWrapper = ({ children }: { children: React.ReactNode })
   const { user } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    if (user) {
-      registerForPushNotificationsAsync().then((token) => {
-        if (token) {
-          updatePushTokenOnServer(token);
+    if (!user) return;
+
+    let active = true;
+    let foregroundSubscription: Notifications.Subscription | undefined;
+    let responseSubscription: Notifications.Subscription | undefined;
+
+    subscribeToNotifications((notification) => {
+      dispatch(addNotification(notification));
+      Toast.show({
+        type: 'info',
+        text1: notification.title,
+        text2: notification.message,
+        visibilityTime: 4000,
+      });
+    });
+
+    if (!isRunningInExpoGo()) {
+      void (async () => {
+        const Notifications = await import('expo-notifications');
+        if (!active) return;
+
+        foregroundSubscription = Notifications.addNotificationReceivedListener(handleForegroundNotification);
+        responseSubscription = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
+
+        const token = await registerForPushNotificationsAsync();
+        if (token && active) {
+          await updatePushTokenOnServer(token);
         }
+      })().catch((error) => {
+        console.error('Failed to initialize push notifications', error);
       });
-
-      const foregroundSubscription = Notifications.addNotificationReceivedListener(handleForegroundNotification);
-      const responseSubscription = Notifications.addNotificationResponseReceivedListener(handleNotificationResponse);
-
-      subscribeToNotifications((notification) => {
-        dispatch(addNotification(notification));
-        Toast.show({
-          type: 'info',
-          text1: notification.title,
-          text2: notification.message,
-          visibilityTime: 4000,
-        });
-      });
-
-      return () => {
-        foregroundSubscription.remove();
-        responseSubscription.remove();
-        unsubscribeFromNotifications();
-      };
     }
+
+    return () => {
+      active = false;
+      foregroundSubscription?.remove();
+      responseSubscription?.remove();
+      unsubscribeFromNotifications();
+    };
   }, [user, dispatch]);
 
   return <>{children}</>;

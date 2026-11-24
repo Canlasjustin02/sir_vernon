@@ -16,6 +16,7 @@ export const createInventorySchema = z.object({
   isActive: z.boolean().optional(),
   isDefault: z.boolean().optional(),
   description: z.string().optional().nullable(),
+  imageUrl: z.string().url().optional().nullable().or(z.literal("")),
   supplierId: objectIdSchema,
   batchQty: z.coerce.number().min(1).optional(),
   isOrderPending: z.boolean().optional(),
@@ -32,6 +33,7 @@ export const updateInventorySchema = z.object({
   isActive: z.boolean().optional(),
   isDefault: z.boolean().optional(),
   description: z.string().optional().nullable(),
+  imageUrl: z.string().url().optional().nullable().or(z.literal("")),
   batchQty: z.coerce.number().min(1).optional(),
   isOrderPending: z.boolean().optional(),
 });

@@ -203,7 +203,7 @@ export async function initCardPayment(orderId: string, userId: string, saveCard:
 
   const merchantId = (process.env.PAYHERE_MERCHANT_ID || '').trim();
   const merchantSecret = (process.env.PAYHERE_SECRET || '').trim();
-  const currency = 'LKR';
+  const currency = 'PHP';
   const amountFormatted = order.totalAmount.toFixed(2);
 
   const secretHash = crypto.createHash('md5').update(merchantSecret).digest('hex').toUpperCase();

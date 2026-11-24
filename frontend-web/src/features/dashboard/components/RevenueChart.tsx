@@ -28,7 +28,7 @@ export default function RevenueChart({ data }: RevenueChartProps) {
             axisLine={false} 
             tickLine={false} 
             tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
-            tickFormatter={(value) => `LKR ${value / 1000}k`}
+            tickFormatter={(value) => `₱${value / 1000}k`}
           />
           <Tooltip 
             contentStyle={{ 

@@ -3,7 +3,7 @@ import { z } from "zod";
 export const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  telephone: z.string().regex(/^(\+94|0)7\d{8}$/, "Telephone must be a valid mobile number (07XXXXXXXX or +947XXXXXXXX)"),
+  telephone: z.string().regex(/^(?:(?:\+94|0)7\d{8}|(?:\+63|0)9\d{9})$/, "Enter 09XXXXXXXXX, +639XXXXXXXXX, 07XXXXXXXX, or +947XXXXXXXXX"),
 });
 
 export const changePasswordSchema = z.object({

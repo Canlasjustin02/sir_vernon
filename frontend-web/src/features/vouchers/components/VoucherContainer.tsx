@@ -49,8 +49,11 @@ export default function VoucherContainer() {
       }
       closeModal();
       fetchVouchers();
-    } catch {
-      toast.error(modalVoucher ? "Failed to update voucher" : "Failed to create voucher");
+    } catch (err: any) {
+      const message =
+        err?.message ||
+        (modalVoucher ? "Failed to update voucher" : "Failed to create voucher");
+      toast.error(message);
     } finally {
       setActionLoading(false);
     }
@@ -62,8 +65,21 @@ export default function VoucherContainer() {
       await deleteVoucher(id);
       toast.success("Voucher deleted");
       fetchVouchers();
-    } catch {
-      toast.error("Failed to delete voucher");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to delete voucher");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleActive = async (voucher: Voucher) => {
+    try {
+      setActionLoading(true);
+      await updateVoucher(voucher._id, { isActive: !voucher.isActive });
+      toast.success(voucher.isActive ? "Voucher deactivated" : "Voucher activated");
+      fetchVouchers();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to update voucher status");
     } finally {
       setActionLoading(false);
     }
@@ -122,6 +138,7 @@ export default function VoucherContainer() {
           vouchers={filteredVouchers}
           onDelete={handleDelete}
           onEdit={openEditModal}
+          onToggleActive={handleToggleActive}
         />
       )}
 

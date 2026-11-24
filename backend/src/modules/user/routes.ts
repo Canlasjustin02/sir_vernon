@@ -24,7 +24,7 @@ router.delete('/profile', controller.deleteProfile);
 
 router.get(
   '/',
-  allowRoles(ROLES.ADMIN),
+  allowRoles(ROLES.ADMIN, ROLES.CUSTOMER),
   validateQuery(getUsersQuerySchema),
   controller.getUsers
 );

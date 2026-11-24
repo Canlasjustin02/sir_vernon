@@ -32,6 +32,22 @@ describe("Auth Zod Schema - registerSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("should accept Philippine local mobile numbers", () => {
+    const result = registerSchema.safeParse({
+      ...valid,
+      telephone: "09368971574",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should accept Philippine international mobile numbers", () => {
+    const result = registerSchema.safeParse({
+      ...valid,
+      telephone: "+639368971574",
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("should fail if password lacks uppercase", () => {
     const result = registerSchema.safeParse({ ...valid, password: "test@1234" });
     expect(result.success).toBe(false);

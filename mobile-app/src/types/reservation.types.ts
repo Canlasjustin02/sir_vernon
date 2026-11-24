@@ -6,6 +6,7 @@ export interface ReservationOption {
 }
 
 export interface ReservationState {
+  shopOwnerId: string | null;
   serviceMode: 'PICKUP_DELIVERY' | 'SELF_SERVICE' | null;
   serviceId: string | null;
   selectedOptions: ReservationOption[];

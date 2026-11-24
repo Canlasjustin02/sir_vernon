@@ -54,7 +54,7 @@ export const ConfirmationCard = ({ orderId, customer, address, onConfirm, onCanc
 
 const confStyles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.6)',
     alignItems: 'center',
     justifyContent: 'center',

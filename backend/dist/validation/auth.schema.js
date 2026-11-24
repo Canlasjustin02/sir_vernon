@@ -1,0 +1,15 @@
+import { z } from "zod";
+export const registerSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Valid email is required"),
+    telephone: z.string().regex(/^(?:(?:\+94|0)7\d{8}|(?:\+63|0)9\d{9})$/, "Enter a valid mobile number (09XXXXXXXXX, +639XXXXXXXXX, 07XXXXXXXX, or +947XXXXXXXXX)"),
+    address: z.string().optional(),
+    password: z.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, "Password must be at least 8 characters and include uppercase, lowercase, number, and special character"),
+});
+export const loginSchema = z.object({
+    email: z.string().email("Valid email is required"),
+    password: z.string().min(1, "Password is required"),
+});
+export const refreshTokenSchema = z.object({
+    refreshToken: z.string().min(1, "Refresh token is required"),
+});

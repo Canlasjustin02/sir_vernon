@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   locateBtn: {
     position: 'absolute',

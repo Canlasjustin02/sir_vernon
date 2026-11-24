@@ -55,8 +55,8 @@ const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
   );
 
   return (
-    <SafeAreaView style={[{ flex: 1, backgroundColor: COLORS.BACKGROUND }, style]}>
-      <StatusBar backgroundColor={statusBarColor} barStyle={barStyle} translucent />
+    <SafeAreaView style={[{ flex: 1, backgroundColor: statusBarColor }, style]}>
+      <StatusBar barStyle={barStyle} translucent />
       {header}
       {withKeyboardAvoidingView ? (
         <KeyboardAvoidingView

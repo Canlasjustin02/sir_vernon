@@ -141,7 +141,7 @@ const OrderSummaryScreen = () => {
                                     <CheckCircle2 size={16} color={COLORS.PRIMARY} />
                                     <Text style={{ fontSize: 14, color: COLORS.TEXT_PRIMARY, fontWeight: '500' }}>{opt.name}</Text>
                                 </View>
-                                <Text style={{ fontSize: 14, color: COLORS.TEXT_SECONDARY }}>Rs.{(opt.price || 0).toFixed(2)}</Text>
+                                <Text style={{ fontSize: 14, color: COLORS.TEXT_SECONDARY }}>₱{(opt.price || 0).toFixed(2)}</Text>
                             </View>
                         ))}
                     </View>
@@ -155,7 +155,7 @@ const OrderSummaryScreen = () => {
                                 <Ticket color={COLORS.SUCCESS} size={24} />
                                 <View>
                                     <Text style={{ color: COLORS.SUCCESS, fontWeight: '600', fontSize: 13 }}>Voucher Applied</Text>
-                                    <Text style={{ color: COLORS.TEXT_PRIMARY, fontWeight: '700' }}>Save Rs.{order.discountTotal?.toFixed(2)}</Text>
+                                    <Text style={{ color: COLORS.TEXT_PRIMARY, fontWeight: '700' }}>Save ₱{order.discountTotal?.toFixed(2)}</Text>
                                 </View>
                             </View>
                             <CheckCircle2 color={COLORS.SUCCESS} size={24} />
@@ -240,26 +240,26 @@ const OrderSummaryScreen = () => {
                 <View style={[styles.priceBreakdown, { marginTop: 8 }]}>
                     <View style={styles.priceRow}>
                         <Text style={styles.priceLabel}>Base Subtotal</Text>
-                        <Text style={styles.priceValue}>Rs {(subtotal || 0).toFixed(2)}</Text>
+                        <Text style={styles.priceValue}>₱{(subtotal || 0).toFixed(2)}</Text>
                     </View>
                     <View style={styles.priceRow}>
                         <Text style={styles.priceLabel}>Additional Options</Text>
-                        <Text style={styles.priceValue}>Rs {(order.extraFee || 0).toFixed(2)}</Text>
+                        <Text style={styles.priceValue}>₱{(order.extraFee || 0).toFixed(2)}</Text>
                     </View>
                     <View style={styles.priceRow}>
                         <Text style={styles.priceLabel}>Delivery Fee</Text>
-                        <Text style={styles.priceValue}>{deliveryFee > 0 ? `Rs ${(deliveryFee || 0).toFixed(2)}` : 'FREE'}</Text>
+                        <Text style={styles.priceValue}>{deliveryFee > 0 ? `₱${(deliveryFee || 0).toFixed(2)}` : 'FREE'}</Text>
                     </View>
                     {discount > 0 && (
                         <View style={styles.priceRow}>
                             <Text style={[styles.priceLabel, { color: COLORS.SUCCESS_TEXT }]}>Voucher Discount</Text>
-                            <Text style={[styles.priceValue, { color: COLORS.SUCCESS_TEXT }]}>-Rs {(discount || 0).toFixed(2)}</Text>
+                            <Text style={[styles.priceValue, { color: COLORS.SUCCESS_TEXT }]}>-₱{(discount || 0).toFixed(2)}</Text>
                         </View>
                     )}
 
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Grand Total</Text>
-                        <Text style={styles.totalValue}>Rs {(totalAmount || 0).toFixed(2)}</Text>
+                        <Text style={styles.totalValue}>₱{(totalAmount || 0).toFixed(2)}</Text>
                     </View>
                 </View>
 

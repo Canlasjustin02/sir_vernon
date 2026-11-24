@@ -7,6 +7,7 @@ export interface AuthUser {
   telephone: string;
   address?: string | null;
   role: ROLES;
+  shopOwnerId?: string | null;
   avatar?: string | null;
   isActive: boolean;
   createdAt?: string;
@@ -16,6 +17,14 @@ export interface AuthUser {
 export interface LoginRequest {
   email: string;
   password: string;
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  telephone: string;
+  password: string;
+  address?: string;
 }
 
 export interface LoginResponse {

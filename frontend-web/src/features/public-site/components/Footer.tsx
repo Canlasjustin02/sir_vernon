@@ -85,7 +85,6 @@ export default function Footer() {
         </div>
 
         <div className="pt-10 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p>© 2026 EcoShine. All rights reserved.</p>
           <div className="flex gap-8">
             <a href="#" className="hover:text-blue-500 transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-blue-500 transition-colors">Terms of Service</a>

@@ -25,7 +25,11 @@ export function useLogin() {
       const res = await authApi.login(payload);
 
       if (!ADMIN_PORTAL_ROLES.includes(res.user.role)) {
-        throw new Error("You are not allowed to access the admin portal.");
+        const message =
+          res.user.role === "CUSTOMER"
+            ? "Please use the customer sign-in page."
+            : "You are not allowed to access the owner dashboard.";
+        throw new Error(message);
       }
 
       tokenStorage.set(res.accessToken, res.refreshToken);

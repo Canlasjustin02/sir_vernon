@@ -58,7 +58,7 @@ export const LoyaltyTiersGrid = ({ tiers, onEdit, loading }: LoyaltyTiersGridPro
                      <div className="flex flex-col">
                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Standard Benefit</p>
                         <p className="text-2xl font-black text-slate-900 tracking-tight">
-                           {tier.discountValue}{tier.discountType === 'PERCENTAGE' ? '%' : ' LKR'}
+                           {tier.discountValue}{tier.discountType === 'PERCENTAGE' ? '%' : ' ₱'}
                            <span className="text-[10px] text-slate-400 ml-1 uppercase">OFF</span>
                         </p>
                      </div>

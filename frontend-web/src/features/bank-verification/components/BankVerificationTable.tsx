@@ -54,7 +54,7 @@ export const BankVerificationTable = ({ data, loading, onViewDetails }: BankVeri
     },
     {
       header: "Amount",
-      cell: (tx) => <span className="font-bold text-slate-900">Rs.{tx.paymentId?.amount?.toFixed(2) || '0.00'}</span>,
+      cell: (tx) => <span className="font-bold text-slate-900">₱{tx.paymentId?.amount?.toFixed(2) || '0.00'}</span>,
     },
     {
       header: "System Check",

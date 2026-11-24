@@ -126,7 +126,7 @@ const OrderDetailsScreen = () => {
               <Text style={detailStyles.quantityText}>{order.weightKg || 1}x</Text>
             </View>
             <Text style={detailStyles.itemName}>{(order.serviceId as any)?.name || 'Laundry Service'}</Text>
-            <Text style={detailStyles.itemPrice}>LKR {(order.subtotal ?? 0).toFixed(2)}</Text>
+            <Text style={detailStyles.itemPrice}>₱{(order.subtotal ?? 0).toFixed(2)}</Text>
           </View>
 
           {/* Options */}
@@ -136,7 +136,7 @@ const OrderDetailsScreen = () => {
                 <Text style={detailStyles.quantityText}>1x</Text>
               </View>
               <Text style={detailStyles.itemName}>{option.name}</Text>
-              <Text style={detailStyles.itemPrice}>LKR {(option.price ?? 0).toFixed(2)}</Text>
+              <Text style={detailStyles.itemPrice}>₱{(option.price ?? 0).toFixed(2)}</Text>
             </View>
           ))}
           
@@ -146,7 +146,7 @@ const OrderDetailsScreen = () => {
                 <Text style={detailStyles.quantityText}>1x</Text>
               </View>
               <Text style={detailStyles.itemName}>Extra Charges</Text>
-              <Text style={detailStyles.itemPrice}>LKR {(order.extraFee ?? 0).toFixed(2)}</Text>
+              <Text style={detailStyles.itemPrice}>₱{(order.extraFee ?? 0).toFixed(2)}</Text>
             </View>
           )}
         </View>
@@ -159,7 +159,9 @@ const OrderDetailsScreen = () => {
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={detailStyles.labelSmall}>Address</Text>
               <Text style={detailStyles.infoText}>
-                {order.pickupAddress || order.deliveryAddress || 'Self Service / In-Store'}
+                {order.serviceMode === 'SELF_SERVICE'
+                  ? 'Drop off and collect your laundry at the selected shop.'
+                  : order.pickupAddress || order.deliveryAddress || 'Self Service / In-Store'}
               </Text>
             </View>
           </View>
@@ -179,26 +181,26 @@ const OrderDetailsScreen = () => {
         <View style={[detailStyles.sectionCard, { marginTop: 10, backgroundColor: COLORS.PRIMARY }]}>
           <View style={detailStyles.summaryRow}>
             <Text style={detailStyles.summaryLabel}>Subtotal</Text>
-            <Text style={detailStyles.summaryValue}>LKR {(order.subtotal ?? 0).toFixed(2)}</Text>
+            <Text style={detailStyles.summaryValue}>₱{(order.subtotal ?? 0).toFixed(2)}</Text>
           </View>
           <View style={detailStyles.summaryRow}>
             <Text style={detailStyles.summaryLabel}>Extra Charges</Text>
-            <Text style={detailStyles.summaryValue}>LKR {(order.extraFee ?? 0).toFixed(2)}</Text>
+            <Text style={detailStyles.summaryValue}>₱{(order.extraFee ?? 0).toFixed(2)}</Text>
           </View>
           <View style={detailStyles.summaryRow}>
             <Text style={detailStyles.summaryLabel}>Delivery Fee</Text>
-            <Text style={detailStyles.summaryValue}>LKR {(order.deliveryFee ?? 0).toFixed(2)}</Text>
+            <Text style={detailStyles.summaryValue}>₱{(order.deliveryFee ?? 0).toFixed(2)}</Text>
           </View>
           {(order.discountTotal || 0) > 0 && (
             <View style={detailStyles.summaryRow}>
               <Text style={detailStyles.summaryLabel}>Voucher Discount</Text>
-              <Text style={[detailStyles.summaryValue, { color: '#BBF7D0' }]}>- LKR {(order.discountTotal ?? 0).toFixed(2)}</Text>
+              <Text style={[detailStyles.summaryValue, { color: '#BBF7D0' }]}>- ₱{(order.discountTotal ?? 0).toFixed(2)}</Text>
             </View>
           )}
           <View style={[detailStyles.divider, { backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 16 }]} />
           <View style={detailStyles.summaryRow}>
             <Text style={[detailStyles.summaryLabel, { fontSize: 20, color: COLORS.WHITE }]}>Total Amount</Text>
-            <Text style={[detailStyles.summaryValue, { fontSize: 24, color: COLORS.WHITE }]}>LKR {(order.totalAmount ?? 0).toFixed(2)}</Text>
+            <Text style={[detailStyles.summaryValue, { fontSize: 24, color: COLORS.WHITE }]}>₱{(order.totalAmount ?? 0).toFixed(2)}</Text>
           </View>
         </View>
 

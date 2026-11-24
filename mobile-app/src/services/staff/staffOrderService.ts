@@ -4,6 +4,7 @@ export interface StaffOrder {
   _id: string;
   orderNo: string;
   status: string;
+  serviceMode?: 'PICKUP_DELIVERY' | 'SELF_SERVICE';
   userId: {
     name: string;
     telephone: string;

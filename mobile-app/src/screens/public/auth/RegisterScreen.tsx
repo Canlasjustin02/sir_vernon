@@ -5,12 +5,12 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StatusBar,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 
@@ -60,7 +60,6 @@ export default function RegisterScreen() {
       email,
       telephone: phone,
       password,
-      role: "CUSTOMER",
     });
 
     const newErrors: Record<string, string> = {};
@@ -89,10 +88,9 @@ export default function RegisterScreen() {
       email: email.trim().toLowerCase(),
       telephone: phone.trim(),
       password,
-      role: "CUSTOMER",
     };
 
-    const resultAction = await dispatch(registerUser(payload as any));
+    const resultAction = await dispatch(registerUser(payload));
 
     if (registerUser.rejected.match(resultAction)) {
       return;
@@ -114,7 +112,7 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView style={authSharedStyles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.BACKGROUND} />
+      <StatusBar style="dark" />
 
       <KeyboardAvoidingView
         style={authSharedStyles.keyboardWrapper}
@@ -197,7 +195,7 @@ export default function RegisterScreen() {
                     />
                     <TextInput
                       style={authSharedStyles.input}
-                      placeholder="07X XXX XXXX"
+                      placeholder="09XXXXXXXXX or 07XXXXXXXX"
                       placeholderTextColor={COLORS.TEXT_MUTED}
                       keyboardType="phone-pad"
                       autoComplete="tel"

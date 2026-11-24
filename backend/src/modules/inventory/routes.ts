@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { auth } from '../../middleware/auth.js';
 import { allowRoles } from '../../middleware/role.js';
+import { upload } from '../../middleware/upload.js';
 import { ROLES } from '../../core/constants.js';
 import {
   validateBody,
@@ -66,6 +67,13 @@ router.patch(
   '/:id/restock',
   validateParams(inventoryIdParamSchema),
   controller.confirmRestock
+);
+
+router.post(
+  '/:id/image',
+  validateParams(inventoryIdParamSchema),
+  upload.single('image'),
+  controller.uploadInventoryImage
 );
 
 export default router;

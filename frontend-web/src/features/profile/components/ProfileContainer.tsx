@@ -6,8 +6,12 @@ import type { UserProfile, ProfileTab } from "../types";
 import { getProfile, updateProfile, updatePassword, uploadAvatar } from "../api/profile.api";
 import { toast } from "react-hot-toast";
 import { User, Shield } from "lucide-react";
+import { useAppDispatch } from "../../../store/hooks";
+import { updateAuthUser } from "../../../store/slices/auth.slice";
+import { userStorage } from "../../../services/storage/userStorage";
 
 export default function ProfileContainer() {
+  const dispatch = useAppDispatch();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -60,10 +64,15 @@ export default function ProfileContainer() {
   const handleAvatarUpload = async (file: File) => {
     try {
       setActionLoading(true);
-      const res = await uploadAvatar(file);
-      const updatedUser = (res as any).data || res;
+      const updatedUser = await uploadAvatar(file);
 
-      setProfile(updatedUser);
+      setProfile(prev => prev ? { ...prev, avatar: updatedUser.avatar } : updatedUser);
+      const authenticatedUser = userStorage.get();
+      if (authenticatedUser) {
+        const updatedAvatar = updatedUser.avatar ?? null;
+        userStorage.set({ ...authenticatedUser, avatar: updatedAvatar });
+        dispatch(updateAuthUser({ avatar: updatedAvatar }));
+      }
       toast.success("Identity visualization synchronized");
     } catch (error) {
       toast.error("Avatar upload protocol failed");

@@ -61,7 +61,7 @@ export const CODTable = ({ data, loading, onViewDetails }: CODTableProps) => {
       header: "Amount",
       cell: (item) => (
         <span className="font-black text-slate-900">
-          Rs.{item.payment?.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          ₱{item.payment?.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </span>
       ),
     },

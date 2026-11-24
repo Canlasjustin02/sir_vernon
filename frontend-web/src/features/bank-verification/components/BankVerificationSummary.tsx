@@ -5,7 +5,7 @@ export const VerificationSummarySection = () => {
         Bank Transfer <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Verification</span>
       </h1>
       <p className="text-slate-500 text-base font-normal leading-normal max-w-[600px]">
-        Review and reconcile manual bank transfers. Verify the reference codes against the
+        Review and reconcile manual bank transfersVerify the reference codes against the
         bank statement to confirm payment success.
       </p>
     </div>

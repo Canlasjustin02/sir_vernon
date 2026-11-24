@@ -67,7 +67,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
       </View>
 
       <View style={styles.cardFooter}>
-        <Text style={styles.priceText}>Rs.{order.totalAmount.toFixed(2)}</Text>
+        <Text style={styles.priceText}>₱{order.totalAmount.toFixed(2)}</Text>
         <View style={styles.actions}>
           {canPay && onPayPress && (
             <TouchableOpacity

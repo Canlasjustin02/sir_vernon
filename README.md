@@ -38,17 +38,32 @@ Built using the **MERN Stack (TypeScript) + React Native**, this system strongly
 
 ## 🏗️ System Architecture
 
-### 🔹 Web Application (Admin & Staff)
-- React SPA with protected routes
-- Role-based dashboard rendering
-- API integration via REST
-- Optimized state management
+```mermaid
+flowchart LR
+    subgraph Customer
+        C[Customer] --> Mobile[Mobile app<br/>Register / log in<br/>Place orders<br/>Track order status]
+    end
 
-### 🔹 Mobile Application (Customer)
-- Built with React Native + Expo
-- Secure token storage
-- Real-time order tracking ready
-- Optimized API consumption
+    subgraph Staff_and_admin
+        S[Laundry staff / admin] --> Web[Web dashboard<br/>Manage orders and customers<br/>Update order status<br/>Manage transactions<br/>View reports]
+    end
+
+    Mobile -->|REST API| API[Backend API<br/>Authentication and role checks<br/>Order and status management]
+    Web -->|REST API| API
+    API <-->|Customer, order,<br/>status and transaction records| DB[(MongoDB)]
+    API -->|Status change| SMS[SMS notification service]
+    SMS -->|Order updates| C
+    API -->|Live status and order history| Mobile
+    API -->|Operational data and reports| Web
+```
+
+Customers register or log in through the Expo mobile app, place laundry orders, and track progress. The Express API authenticates requests and applies role checks before reading or updating customer, order, status, and transaction records in MongoDB. Staff and administrators use the web dashboard to process orders, manage customers and transactions, and view reports. When staff update an order status, the API saves the change, makes it available to both apps, and triggers an SMS update to the customer.
+
+### Shared Accounts and Database
+
+The web dashboard and mobile app use the same Express API and MongoDB database. Configure the database once with `MONGO_URI` in `backend/.env`; set `EXPO_PUBLIC_API_BASE_URL` in `mobile-app/.env` to the reachable backend URL (for a physical phone, use the computer's LAN IP rather than `localhost`). Public registration creates customer accounts only. Owners and staff sign in with accounts provisioned by an administrator; the web dashboard is for owners and staff, while mobile login supports both owner/staff and customer accounts.
+
+The web customer portal provides separate customer sign-in and registration pages. The owner registration page creates only the initial owner account; further public owner registrations are rejected. Registration accepts Philippine mobile numbers (`09XXXXXXXXX` or `+639XXXXXXXXX`) and Sri Lankan mobile numbers (`07XXXXXXXX` or `+947XXXXXXXX`).
 
 ---
 

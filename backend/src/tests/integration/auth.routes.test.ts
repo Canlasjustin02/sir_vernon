@@ -6,11 +6,11 @@ import request from "supertest";
 import app from "../../app.js";
 import { connectTestDB, disconnectTestDB, clearTestDB } from "../testHelpers.js";
 
-describe("Auth Integration Tests - POST /api/auth/register", () => {
-  beforeAll(async () => { await connectTestDB(); });
-  afterAll(async () => { await disconnectTestDB(); });
-  afterEach(async () => { await clearTestDB(); });
+beforeAll(async () => { await connectTestDB(); });
+afterAll(async () => { await disconnectTestDB(); });
+afterEach(async () => { await clearTestDB(); });
 
+describe("Auth Integration Tests - POST /api/auth/register", () => {
   const validPayload = {
     name: "John Doe",
     email: "john@example.com",
@@ -25,6 +25,26 @@ describe("Auth Integration Tests - POST /api/auth/register", () => {
     expect(res.body.success).toBe(true);
     expect(res.body.data).not.toHaveProperty("password");
     expect(res.body.data.email).toBe("john@example.com");
+    expect(res.body.data.role).toBe("CUSTOMER");
+  });
+
+  it("should create a customer even when a privileged role is submitted", async () => {
+    const res = await request(app)
+      .post("/api/auth/register")
+      .send({ ...validPayload, role: "ADMIN" });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.role).toBe("CUSTOMER");
+  });
+
+  it("should register a customer with the Philippine mobile format", async () => {
+    const res = await request(app)
+      .post("/api/auth/register")
+      .send({ ...validPayload, email: "philippine-customer@example.com", telephone: "09368971574" });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.telephone).toBe("09368971574");
+    expect(res.body.data.role).toBe("CUSTOMER");
   });
 
   it("should return 400 if required fields are missing", async () => {
@@ -59,11 +79,40 @@ describe("Auth Integration Tests - POST /api/auth/register", () => {
   });
 });
 
-describe("Auth Integration Tests - POST /api/auth/login", () => {
-  beforeAll(async () => { await connectTestDB(); });
-  afterAll(async () => { await disconnectTestDB(); });
-  afterEach(async () => { await clearTestDB(); });
+describe("Auth Integration Tests - POST /api/auth/register-owner", () => {
+  const ownerPayload = {
+    name: "Laundry Owner",
+    email: "owner@example.com",
+    telephone: "0771234567",
+    password: "Test@1234",
+  };
 
+  it("should create the initial admin account without an invitation code", async () => {
+    const res = await request(app)
+      .post("/api/auth/register-owner")
+      .send(ownerPayload);
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.role).toBe("ADMIN");
+    expect(res.body.data).not.toHaveProperty("password");
+  });
+
+  it("should allow multiple public owner registrations", async () => {
+    const first = await request(app)
+      .post("/api/auth/register-owner")
+      .send(ownerPayload);
+    const second = await request(app)
+      .post("/api/auth/register-owner")
+      .send({ ...ownerPayload, email: "second-owner@example.com" });
+
+    expect(first.status).toBe(201);
+    expect(first.body.data.role).toBe("ADMIN");
+    expect(second.status).toBe(201);
+    expect(second.body.data.role).toBe("ADMIN");
+  });
+});
+
+describe("Auth Integration Tests - POST /api/auth/login", () => {
   const user = {
     name: "Jane Doe",
     email: "jane@example.com",
@@ -84,6 +133,15 @@ describe("Auth Integration Tests - POST /api/auth/login", () => {
     expect(res.body.data).toHaveProperty("accessToken");
     expect(res.body.data).toHaveProperty("refreshToken");
     expect(res.body.data.user).not.toHaveProperty("password");
+  });
+
+  it("should normalize email case when signing in", async () => {
+    const res = await request(app)
+      .post("/api/auth/login")
+      .send({ email: "JANE@EXAMPLE.COM", password: "Test@1234" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.user.email).toBe("jane@example.com");
   });
 
   it("should return 401 for wrong password", async () => {
@@ -112,10 +170,6 @@ describe("Auth Integration Tests - POST /api/auth/login", () => {
 });
 
 describe("Auth Integration Tests - POST /api/auth/refresh-token", () => {
-  beforeAll(async () => { await connectTestDB(); });
-  afterAll(async () => { await disconnectTestDB(); });
-  afterEach(async () => { await clearTestDB(); });
-
   it("should return 400 if refreshToken is missing", async () => {
     const res = await request(app).post("/api/auth/refresh-token").send({});
 

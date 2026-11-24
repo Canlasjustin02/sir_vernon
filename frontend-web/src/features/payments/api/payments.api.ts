@@ -2,7 +2,7 @@ import { apiFetch } from "../../../services/http/interceptors";
 import type { Payment, OnlineTransaction, CODPayment } from "../types";
 import { getOnlineTransactions, getOnlineTransactionById } from "./onlineTransaction.api";
 import { getCashOnDeliveries, updateCODStatus } from "./cod.api";
-import { bankVerificationApi, type PendingTransferData } from "../../bank-verification/api/bank-verification.api";
+import { bankVerificationApi, type PendingTransferData } from "./bankTransferVerification.api";
 
 export const getPayments = async (status?: string) => {
   const query = status ? `?status=${status}` : "";

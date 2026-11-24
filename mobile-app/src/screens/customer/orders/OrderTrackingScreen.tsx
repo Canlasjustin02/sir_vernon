@@ -1,15 +1,19 @@
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Linking } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Clock, MapPin, CheckCircle2, Circle, Package, AlertCircle } from 'lucide-react-native';
+import { ArrowLeft, Clock, MapPin, CheckCircle2, Circle, Package, AlertCircle, Navigation } from 'lucide-react-native';
 import { useEffect, useState, useRef } from 'react';
-import MapView, { Marker, UrlTile } from 'react-native-maps';
+import MapView, { Marker, UrlTile, Polyline } from 'react-native-maps';
+import polyline from '@mapbox/polyline';
 import ScreenWrapper from '../../../components/common/ScreenWrapper';
+import MapAttribution from '../../../components/common/MapAttribution';
 import Loading from '../../../components/common/Loading';
 import { COLORS } from '../../../theme/colors';
 import styles from './styles/Orders.styles';
 import { orderService } from '../../../services/customer/orderService';
 import { Order, OrderStatus } from '../../../types/order.types';
 import { subscribeToOrderStatus, unsubscribeFromOrderStatus, subscribeToStaffLocation, unsubscribeFromStaffLocation } from '../../../services/socketService';
+import { osmService } from '../../../services/maps/osmService';
+import { MAP_TILE_MAX_ZOOM, MAP_TILE_URL } from '../../../constants/maps';
 
 const OrderTrackingScreen = () => {
   const router = useRouter();
@@ -20,6 +24,7 @@ const OrderTrackingScreen = () => {
 
   const [staffLocation, setStaffLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [routeCoords, setRouteCoords] = useState<{ latitude: number; longitude: number }[]>([]);
   const mapRef = useRef<MapView>(null);
 
   const fetchOrderDetails = async () => {
@@ -56,6 +61,61 @@ const OrderTrackingScreen = () => {
     };
   }, [orderId]);
 
+  const isSelfService = order?.serviceMode === 'SELF_SERVICE';
+  const isRiderMoving = !!order && ['PICKUP_ON_THE_WAY', 'DELIVERY_ON_THE_WAY'].includes(order.status);
+  const isPickup = !!order && ['ORDER_PLACED', 'PICKUP_ASSIGNED', 'PICKUP_ON_THE_WAY', 'PICKUP_ARRIVED'].includes(order.status);
+  const destLat = isPickup ? order?.pickupLat : order?.deliveryLat;
+  const destLng = isPickup ? order?.pickupLng : order?.deliveryLng;
+
+  useEffect(() => {
+    const fetchRoute = async () => {
+      if (!showMap || !isRiderMoving || !staffLocation || !destLat || !destLng) {
+        setRouteCoords([]);
+        return;
+      }
+      try {
+        const encoded = await osmService.getDirections(
+          staffLocation.lat,
+          staffLocation.lng,
+          destLat,
+          destLng
+        );
+        if (encoded) {
+          const decoded = polyline.decode(encoded);
+          setRouteCoords(decoded.map((point: any) => ({ latitude: point[0], longitude: point[1] })));
+        } else {
+          setRouteCoords([]);
+        }
+      } catch {
+        setRouteCoords([]);
+      }
+    };
+    fetchRoute();
+  }, [showMap, isRiderMoving, staffLocation?.lat, staffLocation?.lng, destLat, destLng]);
+
+  useEffect(() => {
+    if (!showMap || !isRiderMoving || !mapRef.current || !destLat || !destLng) return;
+    const points = routeCoords.length > 0
+      ? routeCoords
+      : staffLocation
+        ? [{ latitude: staffLocation.lat, longitude: staffLocation.lng }, { latitude: destLat, longitude: destLng }]
+        : [{ latitude: destLat, longitude: destLng }];
+    if (points.length > 0) {
+      mapRef.current.fitToCoordinates(points, {
+        edgePadding: { top: 60, right: 40, bottom: 60, left: 40 },
+        animated: true,
+      });
+    }
+  }, [showMap, isRiderMoving, routeCoords, staffLocation?.lat, staffLocation?.lng, destLat, destLng]);
+
+  const handleOpenDirections = () => {
+    if (!destLat || !destLng) return;
+    const label = encodeURIComponent(isPickup ? 'Pickup location' : 'Delivery location');
+    const appleUrl = `http://maps.apple.com/?daddr=${destLat},${destLng}&dirflg=d&q=${label}`;
+    const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}&travelmode=driving`;
+    Linking.openURL(appleUrl).catch(() => Linking.openURL(webUrl));
+  };
+
   if (loading) return <Loading fullScreen />;
   if (!order) {
     return (
@@ -69,22 +129,32 @@ const OrderTrackingScreen = () => {
     );
   }
 
-  const ORDER_STATUS_STEPS = [
-    { key: 'PLACED', title: 'Order Placed', statuses: ['ORDER_PLACED'], icon: <Package size={18} color={COLORS.PRIMARY} /> },
-    { key: 'PICKUP_ASSIGNED', title: 'Rider Assigned', statuses: ['PICKUP_ASSIGNED'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
-    { key: 'PICKUP_WAY', title: 'Rider Arriving', statuses: ['PICKUP_ON_THE_WAY', 'PICKUP_ARRIVED'], icon: <MapPin size={18} color={COLORS.PRIMARY} /> },
-    { key: 'PICKED_UP', title: 'Picked Up', statuses: ['PICKED_UP'], icon: <Package size={18} color={COLORS.PRIMARY} /> },
-    { key: 'HANDED_OVER', title: 'At Laundry', statuses: ['HANDED_OVER'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
-    { key: 'PROCESSING', title: 'Cleaning & Drying', statuses: ['WASHING', 'DRYING', 'PROCESSING'], icon: <Clock size={18} color={COLORS.PRIMARY} /> },
-    { key: 'READY', title: 'Ready for Delivery', statuses: ['READY'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
-    { key: 'DELIVERY_ASSIGNED', title: 'Delivery Rider Assigned', statuses: ['DELIVERY_ASSIGNED'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
-    { key: 'DELIVERY_WAY', title: 'Out for Delivery', statuses: ['DELIVERY_ON_THE_WAY', 'DELIVERY_ARRIVED'], icon: <MapPin size={18} color={COLORS.PRIMARY} /> },
-    { key: 'DELIVERED', title: 'Delivered', statuses: ['DELIVERED'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
-  ];
+  const ORDER_STATUS_STEPS = isSelfService
+    ? [
+        { key: 'PLACED', title: 'Order Placed', statuses: ['ORDER_PLACED'], icon: <Package size={18} color={COLORS.PRIMARY} /> },
+        { key: 'DROPPED_OFF', title: 'Dropped Off at Laundry', statuses: ['HANDED_OVER'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
+        { key: 'PROCESSING', title: 'Cleaning & Drying', statuses: ['WASHING', 'DRYING', 'PROCESSING'], icon: <Clock size={18} color={COLORS.PRIMARY} /> },
+        { key: 'READY', title: 'Ready for Pickup', statuses: ['READY'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
+        { key: 'COLLECTED', title: 'Picked Up', statuses: ['DELIVERED'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
+      ]
+    : [
+        { key: 'PLACED', title: 'Order Placed', statuses: ['ORDER_PLACED'], icon: <Package size={18} color={COLORS.PRIMARY} /> },
+        { key: 'PICKUP_ASSIGNED', title: 'Rider Assigned', statuses: ['PICKUP_ASSIGNED'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
+        { key: 'PICKUP_WAY', title: 'Rider Arriving', statuses: ['PICKUP_ON_THE_WAY', 'PICKUP_ARRIVED'], icon: <MapPin size={18} color={COLORS.PRIMARY} /> },
+        { key: 'PICKED_UP', title: 'Picked Up', statuses: ['PICKED_UP'], icon: <Package size={18} color={COLORS.PRIMARY} /> },
+        { key: 'HANDED_OVER', title: 'At Laundry', statuses: ['HANDED_OVER'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
+        { key: 'PROCESSING', title: 'Cleaning & Drying', statuses: ['WASHING', 'DRYING', 'PROCESSING'], icon: <Clock size={18} color={COLORS.PRIMARY} /> },
+        { key: 'READY', title: 'Ready for Delivery', statuses: ['READY'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
+        { key: 'DELIVERY_ASSIGNED', title: 'Delivery Rider Assigned', statuses: ['DELIVERY_ASSIGNED'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
+        { key: 'DELIVERY_WAY', title: 'Out for Delivery', statuses: ['DELIVERY_ON_THE_WAY', 'DELIVERY_ARRIVED'], icon: <MapPin size={18} color={COLORS.PRIMARY} /> },
+        { key: 'DELIVERED', title: 'Delivered', statuses: ['DELIVERED'], icon: <CheckCircle2 size={18} color={COLORS.PRIMARY} /> },
+      ];
 
   const isStepReached = (stepStatuses: string[]) => {
     if (!order) return false;
-    const allStatuses = [
+    const allStatuses = isSelfService ? [
+      'ORDER_PLACED', 'HANDED_OVER', 'WASHING', 'DRYING', 'PROCESSING', 'READY', 'DELIVERED'
+    ] : [
       'ORDER_PLACED',
       'PICKUP_ASSIGNED', 'PICKUP_ON_THE_WAY', 'PICKUP_ARRIVED', 'PICKED_UP',
       'HANDED_OVER', 'WASHING', 'DRYING', 'PROCESSING', 'READY',
@@ -105,23 +175,21 @@ const OrderTrackingScreen = () => {
     return new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const steps = ORDER_STATUS_STEPS.map((step) => ({
-    ...step,
-    completed: isStepReached(step.statuses),
-    current: step.statuses.includes(order.status),
-    time: getStepTime(step.statuses) || (step.statuses.includes(order.status) ? 'Ongoing' : 'Pending')
-  }));
+  const steps = ORDER_STATUS_STEPS.map((step) => {
+    const completed = isStepReached(step.statuses);
+    const current = step.statuses.includes(order.status);
 
-  const isRiderMoving = [
-    'PICKUP_ON_THE_WAY', 'DELIVERY_ON_THE_WAY'
-  ].includes(order.status);
-
-  const isPickup = [
-    'ORDER_PLACED', 'PICKUP_ASSIGNED', 'PICKUP_ON_THE_WAY', 'PICKUP_ARRIVED'
-  ].includes(order.status);
-
-  const destLat = isPickup ? order.pickupLat : order.deliveryLat;
-  const destLng = isPickup ? order.pickupLng : order.deliveryLng;
+    return {
+      ...step,
+      completed,
+      current,
+      time: getStepTime(step.statuses) || (
+        current
+          ? order.status === 'DELIVERED' ? 'Completed' : 'Ongoing'
+          : completed ? 'Completed' : 'Pending'
+      )
+    };
+  });
 
   const header = (
     <View style={styles.header}>
@@ -184,26 +252,35 @@ const OrderTrackingScreen = () => {
               }}
             >
               <UrlTile
-                urlTemplate="https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
-                maximumZ={19}
+                urlTemplate={MAP_TILE_URL}
+                maximumZ={MAP_TILE_MAX_ZOOM}
                 flipY={false}
               />
 
-              <Marker coordinate={{ latitude: destLat, longitude: destLng }} title="Your Location">
+              {routeCoords.length > 0 && (
+                <Polyline coordinates={routeCoords} strokeColor={COLORS.PRIMARY} strokeWidth={4} />
+              )}
+
+              <Marker coordinate={{ latitude: destLat, longitude: destLng }} title={isPickup ? "Pickup Location" : "Delivery Location"}>
                 <MapPin size={34} color={COLORS.PRIMARY} fill={COLORS.PRIMARY_LIGHT} />
               </Marker>
               {staffLocation && (
-                <Marker coordinate={{ latitude: staffLocation.lat, longitude: staffLocation.lng }} title="Driver Location">
+                <Marker coordinate={{ latitude: staffLocation.lat, longitude: staffLocation.lng }} title="Rider Location">
                   <View style={trackingStyles.staffPin}>
                     <View style={trackingStyles.staffPinInner} />
                   </View>
                 </Marker>
               )}
             </MapView>
+            <MapAttribution />
             <View style={trackingStyles.liveIndicator}>
               <View style={trackingStyles.liveDot} />
               <Text style={trackingStyles.liveText}>Live Tracking</Text>
             </View>
+            <TouchableOpacity style={trackingStyles.directionsBtn} onPress={handleOpenDirections}>
+              <Navigation size={16} color={COLORS.WHITE} />
+              <Text style={trackingStyles.directionsBtnText}>Directions</Text>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -243,7 +320,9 @@ const OrderTrackingScreen = () => {
                 </View>
                 {step.current && (
                   <View style={trackingStyles.liveBadge}>
-                    <Text style={trackingStyles.liveBadgeText}>ONGOING</Text>
+                    <Text style={trackingStyles.liveBadgeText}>
+                      {order.status === 'DELIVERED' ? 'COMPLETED' : 'ONGOING'}
+                    </Text>
                   </View>
                 )}
               </View>
@@ -257,7 +336,9 @@ const OrderTrackingScreen = () => {
           <View style={styles.detailRow}>
             <MapPin size={18} color={COLORS.PRIMARY} />
             <Text style={styles.detailText}>
-              {order.pickupAddress || order.deliveryAddress || 'Self Service / In-Store Pickup'}
+              {isSelfService
+                ? 'Drop off and collect your laundry at the selected shop.'
+                : order.pickupAddress || order.deliveryAddress || 'Self Service / In-Store Pickup'}
             </Text>
           </View>
         </View>
@@ -372,6 +453,23 @@ const trackingStyles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: COLORS.TEXT_PRIMARY,
+  },
+  directionsBtn: {
+    position: 'absolute',
+    left: 12,
+    bottom: 12,
+    backgroundColor: COLORS.PRIMARY,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  directionsBtnText: {
+    color: COLORS.WHITE,
+    fontSize: 12,
+    fontWeight: '700',
   },
   viewMapBtn: {
     backgroundColor: COLORS.PRIMARY,

@@ -1,31 +1,17 @@
 import { motion } from "framer-motion";
-import { Shirt, Scissors, Truck, Sparkle } from "lucide-react";
+import { Truck, Sparkle, WashingMachine } from "lucide-react";
 
 export default function Services() {
   const services = [
     {
-      title: "Wash & Fold",
-      desc: "Everyday laundry, perfectly cleaned and neatly folded for your convenience.",
-      icon: <Shirt size={32} />,
-      color: "blue",
-    },
-    {
-      title: "Dry Cleaning",
-      desc: "Professional care for your delicate and high-value garments.",
-      icon: <Sparkle size={32} />,
-      color: "sky",
-    },
-    {
-      title: "Ironing",
-      desc: "Crisp, wrinkle-free clothes delivered to your doorstep.",
-      icon: <Scissors size={32} />,
-      color: "indigo",
-    },
-    {
-      title: "Pickup & Delivery",
-      desc: "We come to you. Schedule your pickup and relax while we do the work.",
+      title: "Full-Service Laundry",
+      desc: "Choose wash and fold, dry cleaning, or ironing, then arrange convenient pickup and delivery.",
       icon: <Truck size={32} />,
-      color: "emerald",
+    },
+    {
+      title: "Self-Service Laundry",
+      desc: "Visit our shop and reserve a machine in the mobile app to do your laundry on your schedule.",
+      icon: <WashingMachine size={32} />,
     },
   ];
 
@@ -34,15 +20,15 @@ export default function Services() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
-            <h4 className="text-blue-600 font-bold uppercase tracking-widest mb-4">What We Offer</h4>
-            <h2 className="text-5xl font-extrabold text-slate-900">Premium Services <br /> For Your Wardrobe</h2>
+            <h4 className="text-blue-600 font-bold uppercase tracking-widest mb-4">One Hybrid Laundry Shop</h4>
+            <h2 className="text-5xl font-extrabold text-slate-900">One Shop. <br /> Two Ways to Do Laundry.</h2>
           </div>
           <p className="text-slate-600 text-xl max-w-md">
-            Tailored solutions for all your fabric needs, powered by eco-friendly cleaning technology.
+            Choose full-service care with pickup and delivery, or book a machine and do it yourself at the same shop.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {services.map((s, idx) => (
             <motion.div
               key={s.title}

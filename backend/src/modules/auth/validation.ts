@@ -7,7 +7,7 @@ const isEmail = (value: unknown): value is string =>
 
 const isValidPhone = (value: unknown): value is string =>
   typeof value === "string" &&
-  /^(\+94|0)7\d{8}$/.test(value);
+  /^(?:(?:\+94|0)7\d{8}|(?:\+63|0)9\d{9})$/.test(value);
 
 const isStrongPassword = (value: unknown): value is string =>
   typeof value === "string" &&
@@ -35,7 +35,7 @@ export const validateRegister = (
     return res.status(400).json({
       success: false,
       message:
-        "Telephone must be a valid mobile number (07XXXXXXXX or +947XXXXXXXX)",
+        "Enter 09XXXXXXXXX, +639XXXXXXXXX, 07XXXXXXXX, or +947XXXXXXXXX",
     });
   }
 

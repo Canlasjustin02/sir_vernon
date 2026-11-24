@@ -1,6 +1,6 @@
 import { Landmark, X, FileText, CheckCircle2 } from "lucide-react";
 import { Badge } from "../../../../components/ui/Badge";
-import type { PendingTransferData } from "../../../bank-verification/api/bank-verification.api";
+import type { PendingTransferData } from "../../api/bankTransferVerification.api";
 
 interface BankTransferDrawerProps {
   tx: PendingTransferData | null;
@@ -30,7 +30,7 @@ export const BankTransferDrawer = ({ tx, isOpen, onClose }: BankTransferDrawerPr
           <div className="flex justify-between items-end">
             <div>
               <span className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Transferred Amount</span>
-              <h3 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Rs.{tx.paymentId?.amount?.toFixed(2)}</h3>
+              <h3 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">₱{tx.paymentId?.amount?.toFixed(2)}</h3>
             </div>
             <Badge variant={tx.verifyStatus === 'APPROVED' ? 'success' : tx.verifyStatus === 'REJECTED' ? 'danger' : 'warning'} className="h-fit py-2 px-5 font-black uppercase text-[9px] tracking-widest rounded-full shadow-sm">
               {tx.verifyStatus}

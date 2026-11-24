@@ -2,6 +2,7 @@ export interface LaundryService {
   _id: string;
   name: string;
   category: string;
+  categoryId: string | { _id: string };
   unit: 'KG' | 'PCS' | 'SET' | 'L' | 'ML';
   price: number;
   basePrice?: number;

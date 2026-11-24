@@ -81,6 +81,16 @@ const StaffOrdersScreen = ({ forcedType }: { forcedType?: string }) => {
     }
   };
 
+  const handleStatusUpdate = async (orderId: string, status: string) => {
+    try {
+      await staffOrderService.updateOrderStatus(orderId, status);
+      notify.success('Updated', `Order status moved to ${status.replace(/_/g, ' ')}`);
+      loadAllData();
+    } catch (error: any) {
+      notify.error('Update Failed', error.message || 'Failed to update order status');
+    }
+  };
+
   const renderAssignedTask = ({ item }: { item: StaffOrder }) => (
     <View style={styles.orderCard}>
       <View style={styles.orderHeader}>
@@ -119,7 +129,9 @@ const StaffOrdersScreen = ({ forcedType }: { forcedType?: string }) => {
       <View style={styles.addressRow}>
         <MapPin size={18} color={COLORS.PRIMARY} />
         <Text style={styles.addressText} numberOfLines={2}>
-          {item.status.includes('PICKUP') ? item.pickupAddress : item.deliveryAddress}
+          {item.serviceMode === 'SELF_SERVICE'
+            ? 'Customer drop-off at the laundry shop'
+            : item.status.includes('PICKUP') ? item.pickupAddress : item.deliveryAddress}
         </Text>
       </View>
 
@@ -174,14 +186,20 @@ const StaffOrdersScreen = ({ forcedType }: { forcedType?: string }) => {
       <View style={styles.actionRow}>
         <View>
           <Text style={{ fontSize: 12, color: COLORS.TEXT_SECONDARY }}>PAYOUT</Text>
-          <Text style={{ fontSize: 18, fontWeight: '800', color: COLORS.SUCCESS_TEXT }}>Rs {item.totalAmount.toLocaleString()}</Text>
+          <Text style={{ fontSize: 18, fontWeight: '800', color: COLORS.SUCCESS_TEXT }}>₱{item.totalAmount.toLocaleString()}</Text>
         </View>
         <TouchableOpacity
           style={styles.primaryAction}
-          onPress={() => handleClaim(item._id)}
+          onPress={() => item.serviceMode === 'SELF_SERVICE'
+            ? handleStatusUpdate(item._id, item.status === 'ORDER_PLACED' ? 'HANDED_OVER' : 'DELIVERED')
+            : handleClaim(item._id)}
         >
           <ExternalLink size={18} color={COLORS.WHITE} />
-          <Text style={styles.primaryActionText}>Claim Task</Text>
+          <Text style={styles.primaryActionText}>
+            {item.serviceMode === 'SELF_SERVICE'
+              ? item.status === 'ORDER_PLACED' ? 'Confirm Drop-off' : 'Confirm Pickup'
+              : 'Claim Task'}
+          </Text>
         </TouchableOpacity>
       </View>
 

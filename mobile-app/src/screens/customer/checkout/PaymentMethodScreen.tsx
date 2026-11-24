@@ -15,35 +15,38 @@ const PAYMENT_METHODS = [
     title: 'Credit/Debit Card',
     desc: 'Pay securely with Visa, Mastercard, or Amex',
     icon: CreditCard,
-    route: '/(protected)/(customer)/checkout/card-payment'
+    route: '/(protected)/(customer)/checkout/card-payment',
+    disabled: true,
   },
   {
     id: 'BANK_TRANSFER',
     title: 'Bank Transfer',
     desc: 'Direct transfer via secure banking portal',
     icon: Building2,
-    route: '/(protected)/(customer)/checkout/bank-transfer'
+    route: '/(protected)/(customer)/checkout/bank-transfer',
+    disabled: true,
   },
   {
     id: 'COD',
     title: 'Cash on Delivery',
     desc: 'Pay when your clean laundry arrives',
     icon: Banknote,
-    route: '/(protected)/(customer)/checkout/cash-on-delivery'
+    route: '/(protected)/(customer)/checkout/cash-on-delivery',
+    disabled: false,
   },
 ];
 
 const PaymentMethodScreen = () => {
   const router = useRouter();
   const { orderId, total } = useLocalSearchParams();
-  const [selectedMethod, setSelectedMethod] = useState('CARD');
+  const [selectedMethod, setSelectedMethod] = useState('COD');
 
   const handleContinue = () => {
-    const method = PAYMENT_METHODS.find(m => m.id === selectedMethod);
+    const method = PAYMENT_METHODS.find((m) => m.id === selectedMethod && !m.disabled);
     if (method) {
       router.push({
         pathname: method.route as any,
-        params: { orderId, total }
+        params: { orderId, total },
       });
     }
   };
@@ -75,18 +78,33 @@ const PaymentMethodScreen = () => {
 
         {PAYMENT_METHODS.map((method) => {
           const isActive = selectedMethod === method.id;
+          const isDisabled = !!method.disabled;
           return (
             <TouchableOpacity
               key={method.id}
-              style={[styles.selectionCard, isActive && styles.selectionCardActive]}
-              onPress={() => setSelectedMethod(method.id)}
-              activeOpacity={0.8}
+              style={[
+                styles.selectionCard,
+                isActive && styles.selectionCardActive,
+                isDisabled && { opacity: 0.5 },
+              ]}
+              onPress={() => {
+                if (!isDisabled) setSelectedMethod(method.id);
+              }}
+              activeOpacity={isDisabled ? 1 : 0.8}
+              disabled={isDisabled}
             >
               <View style={styles.selectionIcon}>
                 <method.icon color={isActive ? COLORS.PRIMARY : COLORS.TEXT_SECONDARY} size={24} />
               </View>
               <View style={styles.selectionContent}>
-                <Text style={styles.selectionTitle}>{method.title}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={styles.selectionTitle}>{method.title}</Text>
+                  {isDisabled && (
+                    <Text style={{ fontSize: 10, color: COLORS.TEXT_MUTED, fontFamily: TYPOGRAPHY.FONT_FAMILY.MEDIUM }}>
+                      Disabled
+                    </Text>
+                  )}
+                </View>
                 <Text style={styles.selectionDesc}>{method.desc}</Text>
               </View>
               <View style={[styles.radioOuter, isActive && styles.radioOuterActive]}>
@@ -104,7 +122,7 @@ const PaymentMethodScreen = () => {
               <Text style={{ fontSize: 10, color: COLORS.TEXT_MUTED, textTransform: 'uppercase', letterSpacing: 0.5 }}>Includes Delivery Fee</Text>
             </View>
             <Text style={{ fontSize: 22, fontFamily: TYPOGRAPHY.FONT_FAMILY.BOLD, color: COLORS.TEXT_PRIMARY }}>
-              Rs {total || '0.00'}
+              ₱{total || '0.00'}
             </Text>
           </View>
         </View>

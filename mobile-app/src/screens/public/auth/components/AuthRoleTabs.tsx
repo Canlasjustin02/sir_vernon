@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { loginStyles } from "../styles/login.styles";
 
-type LoginRoleTab = "customer" | "staff";
+type LoginRoleTab = "customer" | "owner";
 
 type Props = {
   activeTab: LoginRoleTab;
@@ -30,19 +30,19 @@ export default function AuthRoleTabs({ activeTab, onChange }: Props) {
       </Pressable>
 
       <Pressable
-        onPress={() => onChange("staff")}
+        onPress={() => onChange("owner")}
         style={[
           loginStyles.tabButton,
-          activeTab === "staff" && loginStyles.activeTabButton,
+          activeTab === "owner" && loginStyles.activeTabButton,
         ]}
       >
         <Text
           style={[
             loginStyles.tabButtonText,
-            activeTab === "staff" && loginStyles.activeTabButtonText,
+            activeTab === "owner" && loginStyles.activeTabButtonText,
           ]}
         >
-          Staff
+          Owner / Staff
         </Text>
       </Pressable>
     </View>

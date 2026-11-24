@@ -1,7 +1,7 @@
 import { Table, type TableColumn } from "../../../../components/ui/Table";
 import { Badge, type BadgeVariant } from "../../../../components/ui/Badge";
 import { Button } from "../../../../components/ui/Button";
-import type { PendingTransferData } from "../../../bank-verification/api/bank-verification.api";
+import type { PendingTransferData } from "../../api/bankTransferVerification.api";
 import { Eye } from "lucide-react";
 
 interface BankTransferTableProps {
@@ -55,7 +55,7 @@ export const BankTransferTable = ({ data, loading, onViewDetails }: BankTransfer
       header: "Amount",
       cell: (tx) => (
         <span className="font-black text-slate-900 leading-none">
-          Rs.{tx.paymentId?.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          ₱{tx.paymentId?.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </span>
       ),
     },

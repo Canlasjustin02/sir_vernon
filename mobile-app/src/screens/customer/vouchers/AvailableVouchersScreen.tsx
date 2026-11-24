@@ -49,7 +49,7 @@ const AvailableVouchersScreen = () => {
     if (orderTotal < voucher.minOrderAmount) {
       notify.error(
         'Ineligible',
-        `This voucher requires a minimum order of Rs.${voucher.minOrderAmount.toFixed(2)}. Your current total is Rs.${orderTotal.toFixed(2)}.`
+        `This voucher requires a minimum order of ₱${voucher.minOrderAmount.toFixed(2)}. Your current total is ₱${orderTotal.toFixed(2)}.`
       );
       return;
     }
@@ -75,7 +75,7 @@ const AvailableVouchersScreen = () => {
     <View style={styles.voucherCard}>
       <View style={styles.leftSection}>
         <Text style={styles.discountText}>
-          {item.discountType === 'PERCENTAGE' ? `${item.discountValue}%` : `Rs.${item.discountValue}`}
+          {item.discountType === 'PERCENTAGE' ? `${item.discountValue}%` : `₱${item.discountValue}`}
         </Text>
         <Text style={styles.offText}>OFF</Text>
       </View>
@@ -85,7 +85,7 @@ const AvailableVouchersScreen = () => {
       <View style={styles.rightSection}>
         <Text style={styles.voucherTitle}>{item.code}</Text>
         <Text style={styles.voucherDesc} numberOfLines={2}>
-          Min. spend Rs.{item.minOrderAmount}. {item.voucherType === 'LOYALTY' ? 'Loyalty exclusive.' : 'Valid for all.'}
+          Min. spend ₱{item.minOrderAmount}. {item.voucherType === 'LOYALTY' ? 'Loyalty exclusive.' : 'Valid for all.'}
         </Text>
 
         <View style={styles.expiryContainer}>

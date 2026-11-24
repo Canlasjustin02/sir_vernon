@@ -6,6 +6,7 @@ import MapView, { Marker, UrlTile } from 'react-native-maps';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ScreenWrapper from '../../../components/common/ScreenWrapper';
+import MapAttribution from '../../../components/common/MapAttribution';
 import { COLORS } from '../../../theme/colors';
 import styles from './styles/Profile.styles';
 import profileService from '../../../services/customer/profileService';
@@ -14,6 +15,7 @@ import { notify } from '../../../utils/notify';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { updateUser } from '../../../store/slices/auth.slice';
 import { addressSchema } from '../../../validation/address.schema';
+import { MAP_TILE_MAX_ZOOM, MAP_TILE_URL } from '../../../constants/maps';
 
 const StaffAddressesScreen = () => {
   const router = useRouter();
@@ -146,8 +148,8 @@ const StaffAddressesScreen = () => {
               mapType="none"
             >
               <UrlTile
-                urlTemplate="https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
-                maximumZ={19}
+                urlTemplate={MAP_TILE_URL}
+                maximumZ={MAP_TILE_MAX_ZOOM}
                 flipY={false}
               />
               <Marker
@@ -157,6 +159,7 @@ const StaffAddressesScreen = () => {
                 title="Your Location"
               />
             </MapView>
+            <MapAttribution />
             <TouchableOpacity style={localStyles.locateBtn} onPress={() => getCurrentLocation()}>
               <LocateFixed size={20} color={COLORS.PRIMARY} />
             </TouchableOpacity>
@@ -227,7 +230,7 @@ const localStyles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   locateBtn: {
     position: 'absolute',

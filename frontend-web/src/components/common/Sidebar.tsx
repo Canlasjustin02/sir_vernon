@@ -5,16 +5,13 @@ import {
   LayoutDashboard,
   Users,
   ShoppingCart,
-  Landmark,
   Package,
   RefreshCcw,
   MessageSquare,
   Truck,
-  BarChart3,
   LogOut,
   CreditCard,
   Ticket,
-  Star,
   Warehouse,
   User,
   Layers,
@@ -58,12 +55,6 @@ const navItems: NavItem[] = [
     icon: <CreditCard size={18} />,
   },
   {
-    id: "bank-verification",
-    label: "Bank Verification",
-    path: "/admin/bank-verification",
-    icon: <Landmark size={18} />,
-  },
-  {
     id: "services",
     label: "Services",
     path: "/admin/services",
@@ -100,12 +91,6 @@ const navItems: NavItem[] = [
     icon: <Ticket size={18} />,
   },
   {
-    id: "loyalty",
-    label: "Loyalty",
-    path: "/admin/loyalty",
-    icon: <Star size={18} />,
-  },
-  {
     id: "feedbacks",
     label: "Feedbacks",
     path: "/admin/feedbacks",
@@ -116,12 +101,6 @@ const navItems: NavItem[] = [
     label: "Deliveries",
     path: "/admin/deliveries",
     icon: <Truck size={18} />,
-  },
-  {
-    id: "reports",
-    label: "Reports",
-    path: "/admin/reports",
-    icon: <BarChart3 size={18} />,
   },
 ];
 

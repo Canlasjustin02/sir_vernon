@@ -60,7 +60,7 @@ export default function OrderTable({ orders, onViewDetails, loading }: OrderTabl
       header: "Grand Total",
       cell: (order) => (
         <span className="font-black text-slate-900">
-          LKR {order.totalAmount.toLocaleString()}
+          ₱{order.totalAmount.toLocaleString()}
         </span>
       ),
     },

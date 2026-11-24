@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import OrderFilters from "./OrderFilters";
 import OrderTable from "./OrderTable";
 import OrderDrawer from "./OrderDrawer";
@@ -15,23 +15,29 @@ export default function OrderContainer() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const response = await getOrders(activeTab === "All" ? undefined : activeTab);
       const ordersData = (response as any).orders || response;
-      setOrders(Array.isArray(ordersData) ? ordersData : []);
+      const nextOrders = Array.isArray(ordersData) ? ordersData : [];
+      setOrders(nextOrders);
+      setSelectedOrder(current => current
+        ? nextOrders.find(order => order._id === current._id) || current
+        : current);
     } catch (error) {
-      toast.error("Failed to fetch orders");
+      if (!silent) toast.error("Failed to fetch orders");
       console.error(error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
-  };
+  }, [activeTab]);
 
   useEffect(() => {
     fetchOrders();
-  }, [activeTab]);
+    const refreshInterval = window.setInterval(() => fetchOrders(true), 10000);
+    return () => window.clearInterval(refreshInterval);
+  }, [fetchOrders]);
 
   const handleUpdateOrder = async (id: string, data: any) => {
     try {

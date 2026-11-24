@@ -32,7 +32,7 @@ export const OnlineTransactionDrawer = ({ transaction, isOpen, onClose }: Online
               <Wallet size={32} />
             </div>
             <h3 className="text-2xl font-black text-slate-900 tracking-tight text-center leading-none">
-              Rs.{transaction.payment?.amount?.toFixed(2)}
+              ₱{transaction.payment?.amount?.toFixed(2)}
             </h3>
             <p className="text-slate-500 text-[10px] font-black mt-2 uppercase tracking-[0.2em]">{transaction.status}</p>
           </div>

@@ -1,23 +1,25 @@
 import { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Truck, ShoppingBag, ChevronRight, CheckCircle2 } from 'lucide-react-native';
 import ScreenWrapper from '../../../components/common/ScreenWrapper';
 import AppHeader from '../../../components/common/AppHeader';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { setServiceMode, nextStep, resetReservation } from '../../../store/slices/customer/reservation.slice';
+import { setServiceMode, setShopOwner, nextStep, resetReservation } from '../../../store/slices/customer/reservation.slice';
 import { COLORS } from '../../../theme/colors';
 import { commonStyles } from './styles/common.styles';
 import styles from './styles/ServiceMode.styles';
 
 const ServiceModeScreen = () => {
     const router = useRouter();
+    const { shopOwnerId } = useLocalSearchParams<{ shopOwnerId?: string }>();
     const dispatch = useAppDispatch();
     const { serviceMode } = useAppSelector((state) => state.reservation);
 
     useEffect(() => {
         dispatch(resetReservation());
-    }, []);
+        if (typeof shopOwnerId === 'string') dispatch(setShopOwner(shopOwnerId));
+    }, [dispatch, shopOwnerId]);
 
     const handleSelectMode = (mode: 'PICKUP_DELIVERY' | 'SELF_SERVICE') => {
         dispatch(setServiceMode(mode));

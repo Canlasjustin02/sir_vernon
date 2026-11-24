@@ -66,7 +66,7 @@ export default function LoyaltyTable({ customers, loading }: LoyaltyTableProps) 
       className: "text-right",
       cell: (data) => (
         <span className="font-bold text-slate-900">
-          LKR {(data.totalSpent || 0).toLocaleString()}
+          ₱{(data.totalSpent || 0).toLocaleString()}
         </span>
       ),
     },

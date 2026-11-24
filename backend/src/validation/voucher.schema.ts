@@ -14,6 +14,7 @@ export const createVoucherSchema = z.object({
   usageLimitTotal: z.coerce.number().min(1).optional(),
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
+  isActive: z.boolean().optional(),
 });
 
 export const updateVoucherSchema = createVoucherSchema.partial();

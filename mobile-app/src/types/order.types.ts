@@ -26,7 +26,7 @@ export interface Order {
   orderNo?: string;
   customer: string;
   serviceId: any;
-  serviceMode: 'PICKUP_DELIVERY' | 'SELF_SERVICE';
+  serviceMode?: 'PICKUP_DELIVERY' | 'SELF_SERVICE';
   status: OrderStatus;
   paymentMethod: string;
   paymentStatus: 'PENDING' | 'PAID' | 'FAILED';

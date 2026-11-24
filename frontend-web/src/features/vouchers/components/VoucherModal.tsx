@@ -51,11 +51,13 @@ export default function VoucherModal({
       usageLimitTotal: undefined,
       startDate: today(),
       endDate: nextWeek(),
+      isActive: true,
     },
   });
 
   const selectedVoucherType = watch("voucherType");
   const selectedDiscountType = watch("discountType");
+  const isActiveValue = watch("isActive");
 
   useEffect(() => {
     if (voucher) {
@@ -70,6 +72,7 @@ export default function VoucherModal({
         usageLimitTotal: voucher.usageLimitTotal || undefined,
         startDate: toDateInput(voucher.startDate),
         endDate: toDateInput(voucher.endDate),
+        isActive: voucher.isActive ?? true,
       });
     } else {
       reset({
@@ -83,6 +86,7 @@ export default function VoucherModal({
         usageLimitTotal: undefined,
         startDate: today(),
         endDate: nextWeek(),
+        isActive: true,
       });
     }
   }, [voucher, isOpen, reset]);
@@ -90,11 +94,30 @@ export default function VoucherModal({
   if (!isOpen) return null;
 
   const handleFormSubmit = (data: any) => {
+    const toOptionalNumber = (value: unknown): number | undefined => {
+      if (value === "" || value == null) return undefined;
+      const num = typeof value === "number" ? value : Number(value);
+      return Number.isFinite(num) ? num : undefined;
+    };
+
     const payload: Record<string, any> = {
       ...data,
+      code: typeof data.code === "string" ? data.code.trim().toUpperCase() : data.code,
+      discountValue: Number(data.discountValue),
+      minOrderAmount: toOptionalNumber(data.minOrderAmount),
+      maxDiscount: toOptionalNumber(data.maxDiscount),
+      usageLimitPerUser: toOptionalNumber(data.usageLimitPerUser),
+      usageLimitTotal: toOptionalNumber(data.usageLimitTotal),
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
+      isActive: typeof data.isActive === "boolean" ? data.isActive : true,
     };
+
+    Object.keys(payload).forEach((key) => {
+      if (payload[key] === undefined) {
+        delete payload[key];
+      }
+    });
 
     if (isEditMode) {
       delete payload.code;
@@ -268,7 +291,7 @@ export default function VoucherModal({
                   type="number"
                   placeholder="—"
                   className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 transition font-bold text-slate-700 placeholder:text-slate-300"
-                  {...register("minOrderAmount", { valueAsNumber: true })}
+                  {...register("minOrderAmount", { setValueAs: (v) => (v === "" || v == null || Number.isNaN(v) ? undefined : Number(v)) })}
                 />
               </div>
               <div>
@@ -279,7 +302,7 @@ export default function VoucherModal({
                   type="number"
                   placeholder="—"
                   className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 transition font-bold text-slate-700 placeholder:text-slate-300"
-                  {...register("maxDiscount", { valueAsNumber: true })}
+                  {...register("maxDiscount", { setValueAs: (v) => (v === "" || v == null || Number.isNaN(v) ? undefined : Number(v)) })}
                 />
               </div>
             </div>
@@ -293,7 +316,7 @@ export default function VoucherModal({
                   type="number"
                   placeholder="Unlimited"
                   className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 transition font-bold text-slate-700 placeholder:text-slate-300"
-                  {...register("usageLimitPerUser", { valueAsNumber: true })}
+                  {...register("usageLimitPerUser", { setValueAs: (v) => (v === "" || v == null || Number.isNaN(v) ? undefined : Number(v)) })}
                 />
               </div>
               <div>
@@ -304,9 +327,33 @@ export default function VoucherModal({
                   type="number"
                   placeholder="Unlimited"
                   className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-indigo-500/10 transition font-bold text-slate-700 placeholder:text-slate-300"
-                  {...register("usageLimitTotal", { valueAsNumber: true })}
+                  {...register("usageLimitTotal", { setValueAs: (v) => (v === "" || v == null || Number.isNaN(v) ? undefined : Number(v)) })}
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">
+                Promo Status
+              </label>
+              <button
+                type="button"
+                onClick={() => setValue("isActive", !isActiveValue, { shouldDirty: true, shouldValidate: true })}
+                className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl border transition-all ${
+                  isActiveValue
+                    ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                    : "bg-slate-50 border-slate-200 text-slate-500"
+                }`}
+              >
+                <span className="text-sm font-bold">
+                  {isActiveValue ? "Active (customers can use this promo)" : "Inactive (promo disabled)"}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase ${
+                  isActiveValue ? "bg-emerald-600 text-white" : "bg-slate-300 text-slate-700"
+                }`}>
+                  {isActiveValue ? "ON" : "OFF"}
+                </span>
+              </button>
             </div>
           </div>
 

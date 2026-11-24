@@ -1,12 +1,33 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import * as authService from "../../services/auth/authService";
-import { AuthUser, LoginResponse, RegisterData, UserRole } from "../../types/auth.types";
+import { AuthUser, LoginResponse, RegisterData } from "../../types/auth.types";
+import { getApiBaseUrlLabel } from "../../constants/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+
+const getAuthErrorMessage = (error: unknown, fallback: string): string => {
+  if (axios.isAxiosError(error)) {
+    const apiUrl = getApiBaseUrlLabel();
+
+    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
+      return `The server took too long to respond (${apiUrl}). Check that the backend is running, your phone and PC are on the same network, firewall allows port 5000, and restart Expo with "npx expo start -c" after .env changes.`;
+    }
+
+    if (!error.response) {
+      return `Cannot reach the server (${apiUrl}). Check your connection and mobile API URL.`;
+    }
+
+    const message = error.response.data?.message;
+    return typeof message === "string" ? message : fallback;
+  }
+
+  return error instanceof Error ? error.message : fallback;
+};
 
 interface LoginPayload {
   email: string;
   password: string;
-  expectedRole?: "CUSTOMER" | "STAFF";
+  expectedRole?: "CUSTOMER" | "OWNER";
 }
 
 interface AuthState {
@@ -37,24 +58,22 @@ export const loginUser = createAsyncThunk<
     try {
       const result = await authService.login(email, password);
 
-      const loggedRole = result.user?.role?.toUpperCase() as UserRole;
+      const loggedRole = result.user?.role?.toUpperCase();
+      const isExpectedRole =
+        expectedRole === "OWNER"
+          ? loggedRole === "ADMIN" || loggedRole === "STAFF"
+          : !expectedRole || expectedRole === loggedRole;
 
-      if (
-        expectedRole &&
-        loggedRole &&
-        expectedRole !== loggedRole &&
-        !(expectedRole === "STAFF" && loggedRole === "ADMIN")
-      ) {
+      if (!isExpectedRole) {
         return thunkAPI.rejectWithValue(
-          `This account is not a ${expectedRole.toLowerCase()} account.`
+          `This account is not a ${expectedRole?.toLowerCase()} account.`
         );
       }
 
+      await authService.persistSession(result);
       return result;
-    } catch (err: any) {
-      return thunkAPI.rejectWithValue(
-        err?.response?.data?.message || "Login failed"
-      );
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue(getAuthErrorMessage(error, "Login failed"));
     }
   }
 );
@@ -67,10 +86,8 @@ export const registerUser = createAsyncThunk<
   try {
     const user = await authService.register(data);
     return user;
-  } catch (err: any) {
-    return thunkAPI.rejectWithValue(
-      err?.response?.data?.message || "Register failed"
-    );
+  } catch (error: unknown) {
+    return thunkAPI.rejectWithValue(getAuthErrorMessage(error, "Register failed"));
   }
 });
 
@@ -82,9 +99,11 @@ export const restoreSession = createAsyncThunk(
   "auth/restoreSession",
   async (_, thunkAPI) => {
     try {
-      const accessToken = await AsyncStorage.getItem("accessToken");
-      const refreshToken = await AsyncStorage.getItem("refreshToken");
-      const userJson = await AsyncStorage.getItem("user");
+      const [accessToken, refreshToken, userJson] = await Promise.all([
+        AsyncStorage.getItem("accessToken"),
+        AsyncStorage.getItem("refreshToken"),
+        AsyncStorage.getItem("user"),
+      ]);
 
       if (accessToken && userJson) {
         try {

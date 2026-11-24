@@ -28,7 +28,7 @@ export default function Hero() {
             </h1>
 
             <p className="text-xl text-slate-600 leading-relaxed mb-10 max-w-lg">
-              Experience the future of laundry service. We pick up, clean, and deliver your clothes with professional care, all managed from our smart mobile app.
+              One shop, two ways to do laundry: choose full-service pickup and delivery, or reserve a machine for self-service in our mobile app.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-6 mb-10">

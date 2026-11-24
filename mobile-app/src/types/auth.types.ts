@@ -24,7 +24,6 @@ export interface RegisterData {
 export interface LoginRequest {
   email: string;
   password: string;
-  expectedRole?: UserRole;
 }
 
 export interface LoginResponse {

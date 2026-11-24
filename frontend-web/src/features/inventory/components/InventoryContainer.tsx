@@ -4,7 +4,7 @@ import InventoryFilters from "./InventoryFilters";
 import InventoryTable from "./InventoryTable";
 import InventoryModal from "./InventoryModal";
 import type { InventoryItem, Tab } from "../types";
-import { getInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem, markOrdered, restockItem } from "../api/inventory.api";
+import { getInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem, markOrdered, restockItem, uploadInventoryImage } from "../api/inventory.api";
 import { toast } from "react-hot-toast";
 import RestockModal from "./RestockModal";
 import ConfirmDialog from "../../../components/common/ConfirmDialog";
@@ -58,20 +58,35 @@ export default function InventoryContainer() {
     fetchItems();
   }, [activeTab]);
 
-  const handleSave = async (data: Partial<InventoryItem>) => {
+  const handleSave = async (data: Partial<InventoryItem>, imageFile?: File | null) => {
     try {
       setActionLoading(true);
+      let savedItem: any;
+
       if (selectedItem) {
-        await updateInventoryItem(selectedItem._id, data);
-        toast.success("Item updated successfully");
+        savedItem = await updateInventoryItem(selectedItem._id, data);
       } else {
-        await createInventoryItem(data);
-        toast.success("New item created");
+        savedItem = await createInventoryItem(data);
       }
+
+      const savedId =
+        savedItem?._id ||
+        savedItem?.data?._id ||
+        selectedItem?._id;
+
+      if (imageFile && savedId) {
+        try {
+          await uploadInventoryImage(savedId, imageFile);
+        } catch {
+          toast.error("Item saved, but image upload failed");
+        }
+      }
+
+      toast.success(selectedItem ? "Item updated successfully" : "New item created");
       setIsModalOpen(false);
       fetchItems();
-    } catch (error) {
-      toast.error("Failed to save item");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to save item");
     } finally {
       setActionLoading(false);
     }

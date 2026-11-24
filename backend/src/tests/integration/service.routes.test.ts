@@ -43,5 +43,31 @@ describe("Service Integration Tests", () => {
       expect(res.status).toBe(201);
       expect(res.body.data.name).toBe("Dry Clean");
     });
+
+    it("should keep each owner's services in their own catalog", async () => {
+      const { user: firstOwner, token: firstOwnerToken } = await createTestUser("ADMIN");
+      const { token: secondOwnerToken } = await createTestUser("ADMIN");
+
+      const firstCreate = await request(app)
+        .post("/api/services")
+        .set(getAuthHeader(firstOwnerToken))
+        .send({ name: "Shop One Wash", price: 12, categoryId });
+      const secondCreate = await request(app)
+        .post("/api/services")
+        .set(getAuthHeader(secondOwnerToken))
+        .send({ name: "Shop Two Wash", price: 15, categoryId });
+
+      expect(firstCreate.status).toBe(201);
+      expect(secondCreate.status).toBe(201);
+
+      const firstCatalog = await request(app)
+        .get("/api/services/manage")
+        .set(getAuthHeader(firstOwnerToken));
+
+      expect(firstCatalog.status).toBe(200);
+      expect(firstCatalog.body.data.items).toHaveLength(1);
+      expect(firstCatalog.body.data.items[0].name).toBe("Shop One Wash");
+      expect(firstCatalog.body.data.items[0].ownerId.toString()).toBe(firstOwner._id.toString());
+    });
   });
 });

@@ -21,7 +21,7 @@ const HelpSupportScreen = () => {
     },
     {
       question: 'What is the turnaround time?',
-      answer: 'Our standard turnaround time is 24-48 hours. Express services are available for 12-hour delivery at an additional cost.'
+      answer: 'Our standard turnaround time is 24-48 hoursExpress services are available for 12-hour delivery at an additional cost.'
     },
     {
       question: 'How do I apply a voucher?',

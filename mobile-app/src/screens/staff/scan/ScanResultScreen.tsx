@@ -79,7 +79,7 @@ const ScanResultScreen = () => {
                  <Text style={s.serviceName}>{result.serviceMode}</Text>
                  <Text style={s.serviceMeta}>{result.itemsCount} Items • Professional Care</Text>
               </View>
-              <Text style={s.servicePrice}>Rs {result.totalAmount.toLocaleString()}</Text>
+              <Text style={s.servicePrice}>₱{result.totalAmount.toLocaleString()}</Text>
            </View>
         </View>
 

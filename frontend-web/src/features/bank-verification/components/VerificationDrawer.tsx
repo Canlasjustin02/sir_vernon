@@ -210,9 +210,9 @@ export const VerificationDrawer: React.FC<DrawerProps> = ({ isOpen, onClose, tra
                   <tbody className="divide-y divide-slate-50">
                     <tr className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-5 font-bold text-slate-500">Total Amount</td>
-                      <td className="px-6 py-5 font-black text-slate-900">Rs.{transfer.paymentId?.amount?.toLocaleString()}</td>
+                      <td className="px-6 py-5 font-black text-slate-900">₱{transfer.paymentId?.amount?.toLocaleString()}</td>
                       <td className="px-6 py-5 font-black text-blue-600">
-                        {transfer.extractedAmount ? `Rs.${transfer.extractedAmount.toLocaleString()}` : 'Not Detected'}
+                        {transfer.extractedAmount ? `₱${transfer.extractedAmount.toLocaleString()}` : 'Not Detected'}
                       </td>
                       <td className="px-6 py-5 text-center">
                         {transfer.extractedAmount === transfer.paymentId?.amount ? (

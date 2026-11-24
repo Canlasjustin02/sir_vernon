@@ -120,7 +120,7 @@ export const TierManagementDrawer = ({ isOpen, tier, onClose, onSave, loading }:
                            className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest transition-all ${formData.discountType === 'FIXED' ? 'bg-white shadow-lg text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                            <Banknote size={14} />
-                           Fixed (LKR)
+                           Fixed (₱)
                         </button>
                      </div>
 
@@ -134,7 +134,7 @@ export const TierManagementDrawer = ({ isOpen, tier, onClose, onSave, loading }:
                            onChange={(e) => setFormData({ ...formData, discountValue: parseInt(e.target.value) })}
                         />
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 text-indigo-600 font-black">
-                           {formData.discountType === 'PERCENTAGE' ? '%' : 'LKR'}
+                           {formData.discountType === 'PERCENTAGE' ? '%' : 'PHP'}
                         </div>
                      </div>
                   </section>

@@ -7,8 +7,7 @@ import { COLORS } from '../../../theme/colors';
 import styles from './styles/Orders.styles';
 
 /**
- * Screen displaying the history of all completed and cancelled orders.
- * Includes status-based filtering and premium card-based layout.
+ * Screen displaying the history of all completed and cancelled orders* Includes status-based filtering and premium card-based layout.
  */
 const OrderHistoryScreen = () => {
   const router = useRouter();
@@ -79,7 +78,7 @@ const OrderHistoryScreen = () => {
       </View>
 
       <View style={styles.cardFooter}>
-        <Text style={styles.priceText}>LKR {item.total.toFixed(2)}</Text>
+        <Text style={styles.priceText}>₱{item.total.toFixed(2)}</Text>
         <TouchableOpacity 
           style={styles.trackButton}
           onPress={() => router.push('/(protected)/(customer)/vouchers/index')}
@@ -130,7 +129,7 @@ const OrderHistoryScreen = () => {
             <View style={styles.emptyContainer}>
               <Search size={64} color={COLORS.TEXT_SECONDARY} opacity={0.2} />
               <Text style={styles.emptyTitle}>No orders found</Text>
-              <Text style={styles.emptySubtitle}>Try adjusting your filters to see more orders.</Text>
+              <Text style={styles.emptySubtitle}>Try adjusting your filters to see more orders</Text>
             </View>
           }
         />

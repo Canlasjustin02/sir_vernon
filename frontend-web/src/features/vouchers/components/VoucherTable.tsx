@@ -10,9 +10,10 @@ interface VoucherTableProps {
   vouchers: Voucher[];
   onDelete: (id: string) => void;
   onEdit: (voucher: Voucher) => void;
+  onToggleActive: (voucher: Voucher) => void;
 }
 
-export default function VoucherTable({ vouchers, onDelete, onEdit }: VoucherTableProps) {
+export default function VoucherTable({ vouchers, onDelete, onEdit, onToggleActive }: VoucherTableProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [targetId, setTargetId] = useState<string | null>(null);
 
@@ -57,7 +58,7 @@ export default function VoucherTable({ vouchers, onDelete, onEdit }: VoucherTabl
         <span className="font-bold text-slate-700">
           {voucher.discountType === "PERCENTAGE"
             ? `${voucher.discountValue || 0}% Off`
-            : `LKR ${(voucher.discountValue || 0).toLocaleString()} Off`}
+            : `₱${(voucher.discountValue || 0).toLocaleString()} Off`}
         </span>
       ),
     },
@@ -107,15 +108,18 @@ export default function VoucherTable({ vouchers, onDelete, onEdit }: VoucherTabl
     {
       header: "Status",
       cell: (voucher) => (
-        <span
-          className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${
+        <button
+          type="button"
+          onClick={() => onToggleActive(voucher)}
+          className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border transition-all hover:opacity-80 active:scale-95 ${
             voucher.isActive
               ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-              : "bg-slate-50 text-slate-400 border-slate-100"
+              : "bg-slate-50 text-slate-400 border-slate-100 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-100"
           }`}
+          title={voucher.isActive ? "Click to deactivate voucher" : "Click to activate voucher"}
         >
           {voucher.isActive ? "Active" : "Disabled"}
-        </span>
+        </button>
       ),
     },
     {

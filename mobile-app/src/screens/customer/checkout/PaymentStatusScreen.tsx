@@ -130,7 +130,7 @@ const PaymentStatusScreen = () => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
               <Text style={{ fontSize: 13, color: COLORS.TEXT_MUTED }}>Amount Paid</Text>
               <Text style={{ fontSize: 18, color: COLORS.PRIMARY, fontWeight: '800' }}>
-                Rs {total}
+                ₱{total}
               </Text>
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

@@ -12,6 +12,9 @@ import { categoryApi } from "../../category/api/category.api";
 import type { ServiceCategory } from "../../category/types";
 import { toast } from "react-hot-toast";
 
+const DEFAULT_CATEGORY_OPTION = "__default_service_category__";
+const DEFAULT_CATEGORY_NAME = "Wash & Fold";
+
 interface ServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,7 +24,7 @@ interface ServiceModalProps {
 
 export default function ServiceModal({ isOpen, onClose, onSubmit, initialData }: ServiceModalProps) {
   const [inventoryRegistry, setInventoryRegistry] = useState<InventoryItem[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
 
   const {
     register,
@@ -35,7 +38,7 @@ export default function ServiceModal({ isOpen, onClose, onSubmit, initialData }:
     resolver: zodResolver(serviceSchema),
     defaultValues: {
       name: "",
-      category: "Wash & Fold",
+      categoryId: "",
       unit: "KG",
       price: 0,
       isActive: true,
@@ -67,20 +70,22 @@ export default function ServiceModal({ isOpen, onClose, onSubmit, initialData }:
       fetchInventory();
 
       categoryApi.getAllCategories<ServiceCategory>("SERVICE").then((cats) => {
-        const names = cats.map((c) => c.name);
-        setCategories(names);
-        if (!initialData && names.length > 0) {
-          setValue("category", names[0]);
+        setCategories(cats);
+        if (!initialData && cats.length > 0) {
+          setValue("categoryId", cats[0]._id);
         }
-      }).catch(() => { });
+      }).catch(() => toast.error("Failed to load service categories"));
     }
   }, [isOpen, initialData, setValue]);
 
   useEffect(() => {
     if (initialData) {
+      const categoryId = typeof initialData.categoryId === "string"
+        ? initialData.categoryId
+        : initialData.categoryId?._id || "";
       reset({
         name: initialData.name,
-        category: (initialData as any).category || (initialData as any).categoryName || "Wash & Fold",
+        categoryId,
         unit: (initialData as any).unit || "KG",
         price: (initialData as any).price || (initialData as any).basePrice || 0,
         isActive: initialData.isActive,
@@ -91,7 +96,7 @@ export default function ServiceModal({ isOpen, onClose, onSubmit, initialData }:
     } else {
       reset({
         name: "",
-        category: categories[0] || "Wash & Fold",
+        categoryId: categories[0]?._id || DEFAULT_CATEGORY_OPTION,
         unit: "KG",
         price: 0,
         isActive: true,
@@ -104,8 +109,27 @@ export default function ServiceModal({ isOpen, onClose, onSubmit, initialData }:
 
   if (!isOpen) return null;
 
-  const handleFormSubmit = (data: ServiceInput) => {
-    onSubmit(data as any);
+  const handleFormSubmit = async (data: ServiceInput) => {
+    let categoryId = data.categoryId;
+    if (categoryId === DEFAULT_CATEGORY_OPTION) {
+      try {
+        const existingCategories = await categoryApi.getAllCategories<ServiceCategory>("SERVICE");
+        const defaultCategory = existingCategories.find((category) => category.name === DEFAULT_CATEGORY_NAME)
+          ?? existingCategories[0]
+          ?? await categoryApi.createCategory<ServiceCategory>("SERVICE", {
+            name: DEFAULT_CATEGORY_NAME,
+            price: 0,
+            isActive: true,
+          });
+        setCategories(existingCategories.length > 0 ? existingCategories : [defaultCategory]);
+        categoryId = defaultCategory._id;
+      } catch {
+        toast.error("Could not create the default service category");
+        return;
+      }
+    }
+
+    onSubmit({ ...data, categoryId } as any);
     onClose();
   };
 
@@ -147,15 +171,19 @@ export default function ServiceModal({ isOpen, onClose, onSubmit, initialData }:
               <div className="grid grid-cols-2 gap-4">
                 <select
                   className="h-14 bg-slate-50 border-none rounded-2xl px-6 text-sm font-bold text-slate-700 outline-none ring-offset-white focus:ring-2 focus:ring-blue-500/10"
-                  {...register("category")}
+                  {...register("categoryId")}
                 >
                   {categories.length === 0 && (
-                    <option value="Wash & Fold">Wash & Fold</option>
+                    <option value={DEFAULT_CATEGORY_OPTION}>{DEFAULT_CATEGORY_NAME}</option>
                   )}
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
+                  {categories.map((category) => (
+                    <option key={category._id} value={category._id}>{category.name}</option>
                   ))}
                 </select>
+                {categories.length === 0 && (
+                  <p className="col-span-2 text-[10px] text-slate-400">A default service category will be created when you save.</p>
+                )}
+                {errors.categoryId && <p className="col-span-2 text-[10px] text-red-500 font-bold">{errors.categoryId.message}</p>}
                 <select
                   className="h-14 bg-slate-50 border-none rounded-2xl px-6 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500/10"
                   {...register("unit")}
@@ -233,7 +261,7 @@ export default function ServiceModal({ isOpen, onClose, onSubmit, initialData }:
 
             <div className="space-y-4">
               <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                <Percent size={12} /> Base Rate (LKR)
+                <Percent size={12} /> Base Rate (₱)
               </label>
               <Input
                 type="number"

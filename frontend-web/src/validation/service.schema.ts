@@ -9,8 +9,7 @@ export const serviceCategorySchema = z.object({
 });
 
 export const serviceSchema = z.object({
-  categoryId: z.string().min(1, "Category ID is required").optional(),
-  category: z.string().min(1, "Category name is required").optional(),
+  categoryId: z.string().min(1, "Select a service category"),
   name: z.string().min(1, "Service name is required"),
   price: z.number().nonnegative("Price must be non-negative"),
   unit: z.enum(serviceUnits),

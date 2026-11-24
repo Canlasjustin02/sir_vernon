@@ -62,11 +62,11 @@ const ReceiptScreen = () => {
 
           <View style={styles.row}>
             <Text style={styles.itemLabel}>Service Charge</Text>
-            <Text style={styles.value}>Rs {order.subtotal.toFixed(2)}</Text>
+            <Text style={styles.value}>₱{order.subtotal.toFixed(2)}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.itemLabel}>Delivery Fee</Text>
-            <Text style={styles.value}>Rs {order.deliveryFee.toFixed(2)}</Text>
+            <Text style={styles.value}>₱{order.deliveryFee.toFixed(2)}</Text>
           </View>
 
           <Divider marginVertical={24} style={{ borderStyle: 'dashed' }} />
@@ -74,7 +74,7 @@ const ReceiptScreen = () => {
           {/* Total */}
           <View style={[styles.row, { marginTop: 8 }]}>
             <Text style={styles.totalLabel}>TOTAL AMOUNT</Text>
-            <Text style={styles.totalValue}>Rs {order.totalAmount.toFixed(2)}</Text>
+            <Text style={styles.totalValue}>₱{order.totalAmount.toFixed(2)}</Text>
           </View>
 
           <View style={styles.footer}>

@@ -5,7 +5,7 @@ export default function About() {
   const features = [
     {
       title: "Fast Turnaround",
-      desc: "Get your clean clothes back within 24 hours. Speed meets quality.",
+      desc: "Get your clean clothes back within 24 hoursSpeed meets quality.",
       icon: <Zap className="text-amber-500" size={32} />,
     },
     {

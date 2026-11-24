@@ -26,7 +26,7 @@ const SLIDES = [
   {
     id: '3',
     title: 'Fast Delivery',
-    subtitle: 'Freshly cleaned laundry delivered to your door in as little as 24 hours.',
+    subtitle: 'Freshly cleaned laundry delivered to your door in as little as 24 hours',
     icon: <Truck size={120} color={COLORS.PRIMARY} />,
     color: '#FFF7ED'
   }

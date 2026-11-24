@@ -169,7 +169,7 @@ const CardPaymentScreen = () => {
                     <View style={styles.content}>
                         <View style={styles.summaryCard}>
                             <Text style={styles.summaryLabel}>Amount Due</Text>
-                            <Text style={styles.summaryAmount}>Rs. {total}</Text>
+                            <Text style={styles.summaryAmount}>₱{total}</Text>
                         </View>
 
                         <Text style={styles.sectionTitle}>Select a Card</Text>
@@ -208,7 +208,7 @@ const CardPaymentScreen = () => {
                                 style={styles.payButton}
                                 onPress={() => selectedCard ? handlePayWithSavedCard() : handleNewCard()}
                             >
-                                <Text style={styles.payButtonText}>Pay Rs. {total}</Text>
+                                <Text style={styles.payButtonText}>Pay ₱{total}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     webviewLoader: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         backgroundColor: COLORS.WHITE,
         justifyContent: 'center',
         alignItems: 'center',

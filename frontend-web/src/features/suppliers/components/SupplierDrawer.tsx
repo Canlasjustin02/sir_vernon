@@ -43,24 +43,27 @@ export const SupplierDrawer = ({ isOpen, onClose, supplier, onSave, loading }: S
   const selectedStatus = watch("status");
 
   useEffect(() => {
-    if (isOpen) {
-      const fetchCategories = async () => {
-        try {
-          setFetchingCategories(true);
-          const data = await categoryApi.getAllCategories<InventoryCategory>("INVENTORY");
-          setCategories(data);
+    if (!isOpen) return;
 
-          if (!supplier && data.length > 0) {
-            setValue("category", data[0].name);
-          }
-        } catch (error) {
-          toast.error("Failed to load inventory categories");
-        } finally {
-          setFetchingCategories(false);
+    const fetchCategories = async () => {
+      try {
+        setFetchingCategories(true);
+        const data = await categoryApi.getAllCategories<InventoryCategory>("INVENTORY");
+        const list = Array.isArray(data) ? data : [];
+        setCategories(list);
+
+        if (!supplier && list.length > 0) {
+          setValue("category", list[0].name, { shouldDirty: false, shouldValidate: true });
         }
-      };
-      fetchCategories();
-    }
+      } catch (error) {
+        toast.error("Failed to load inventory categories");
+        setCategories([]);
+      } finally {
+        setFetchingCategories(false);
+      }
+    };
+
+    fetchCategories();
   }, [isOpen, supplier, setValue]);
 
   useEffect(() => {
@@ -71,7 +74,7 @@ export const SupplierDrawer = ({ isOpen, onClose, supplier, onSave, loading }: S
         email: supplier.email,
         phone: supplier.phone,
         address: supplier.address,
-        category: supplier.category,
+        category: supplier.category || "",
         status: supplier.status || "ACTIVE",
       });
     } else {
@@ -188,14 +191,24 @@ export const SupplierDrawer = ({ isOpen, onClose, supplier, onSave, loading }: S
                   <select
                     className={`w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-blue-500/10 transition-all font-bold text-sm ${errors.category ? 'ring-2 ring-red-500/50' : ''}`}
                     {...register("category")}
+                    disabled={fetchingCategories}
                   >
-                    <option value="" disabled>Select Category</option>
-                    {categories.map(cat => (
-                      <option key={cat._id} value={cat.name}>{cat.name}</option>
+                    <option value="" disabled>
+                      {fetchingCategories ? "Loading categories..." : "Select Category"}
+                    </option>
+                    {categories.map((cat) => (
+                      <option key={cat._id} value={cat.name}>
+                        {cat.name}
+                      </option>
                     ))}
                   </select>
                 </div>
                 {errors.category && <p className="text-[10px] text-red-500 mt-1 ml-1 font-bold">{errors.category.message as string}</p>}
+                {!fetchingCategories && categories.length === 0 && (
+                  <p className="text-[10px] text-amber-600 mt-1 ml-1 font-bold">
+                    No inventory categories found. Create one in Categories (Inventory) first.
+                  </p>
+                )}
               </div>
 
               <div>

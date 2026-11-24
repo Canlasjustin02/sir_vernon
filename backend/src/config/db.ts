@@ -15,7 +15,9 @@ export const connectDB = async (): Promise<void> => {
       return;
     }
 
-    await mongoose.connect(config.MONGO_URI);
+    await mongoose.connect(config.MONGO_URI, {
+      dbName: config.MONGO_DB_NAME,
+    });
 
     logger.info(`MongoDB Connected Successfully`);
   } catch (err) {

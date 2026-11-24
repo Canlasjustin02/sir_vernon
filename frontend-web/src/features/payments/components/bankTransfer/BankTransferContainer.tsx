@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Landmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { paymentsApi } from "../../api/payments.api";
-import type { PendingTransferData } from "../../../bank-verification/api/bank-verification.api";
+import type { PendingTransferData } from "../../api/bankTransferVerification.api";
 import { BankTransferTable } from "./BankTransferTable";
 import { BankTransferDrawer } from "./BankTransferDrawer";
 import { BankTransferFilters } from "./BankTransferFilters";

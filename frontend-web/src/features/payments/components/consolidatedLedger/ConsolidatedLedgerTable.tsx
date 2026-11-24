@@ -59,7 +59,7 @@ export const ConsolidatedLedgerTable = ({ payments, onView }: ConsolidatedLedger
       header: "Amount",
       cell: (payment) => (
         <span className="font-black text-slate-900">
-          LKR {payment.amount.toLocaleString()}
+          ₱{payment.amount.toLocaleString()}
         </span>
       ),
     },

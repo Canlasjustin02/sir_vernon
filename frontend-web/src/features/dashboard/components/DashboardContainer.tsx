@@ -78,7 +78,7 @@ export default function DashboardContainer() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPIStatCard
           label={getRangeLabel("Revenue")}
-          value={`LKR ${(data?.todayRevenue || 0).toLocaleString()}`}
+          value={`₱${(data?.todayRevenue || 0).toLocaleString()}`}
           trend="Real-time"
           isPositive={true}
           Icon={DollarSign}
@@ -151,7 +151,7 @@ export default function DashboardContainer() {
           <div className="flex items-center justify-between mb-8 relative z-10">
             <div>
               <h3 className="text-lg font-black text-slate-900">Revenue Trajectory</h3>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">LKR Cumulative Growth</p>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">₱Cumulative Growth</p>
             </div>
             <div className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-tighter">Live Sync</div>
           </div>

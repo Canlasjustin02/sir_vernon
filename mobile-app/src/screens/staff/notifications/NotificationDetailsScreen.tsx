@@ -6,8 +6,7 @@ import { COLORS } from '../../../theme/colors';
 import styles from '../styles/Staff.styles';
 
 /**
- * Screen displaying the full content of a notification for Staff users.
- * Focuses on operational alerts like new orders or delivery updates.
+ * Screen displaying the full content of a notification for Staff users* Focuses on operational alerts like new orders or delivery updates.
  */
 const StaffNotificationDetailsScreen = () => {
   const router = useRouter();

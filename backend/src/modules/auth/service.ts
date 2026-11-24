@@ -7,7 +7,6 @@ import {
   AuthPayload,
 } from "../../utils/jwt.js";
 import ApiError from "../../core/apiError.js";
-import { Role } from "../../core/constants.js";
 import { sendSms } from "../../utils/smsService.js";
 
 type RegisterInput = {
@@ -16,7 +15,6 @@ type RegisterInput = {
   telephone: string;
   address?: string;
   password: string;
-  role?: Role;
 };
 
 type LoginInput = {
@@ -28,15 +26,12 @@ type RefreshInput = {
   refreshToken: string;
 };
 
-export const register = async ({
-  name,
-  email,
-  telephone,
-  address,
-  password,
-  role,
-}: RegisterInput) => {
-  const existingUser = await User.findOne({ email });
+const createUser = async (
+  { name, email, telephone, address, password }: RegisterInput,
+  role: "CUSTOMER" | "ADMIN"
+) => {
+  const normalizedEmail = email.trim().toLowerCase();
+  const existingUser = await User.findOne({ email: normalizedEmail });
 
   if (existingUser) throw new ApiError(409, "Email is already in use");
 
@@ -44,11 +39,11 @@ export const register = async ({
 
   const user = await User.create({
     name,
-    email,
+    email: normalizedEmail,
     telephone,
     address,
     password: hashed,
-    role: role ?? "CUSTOMER",
+    role,
   });
 
   const userData = user.toObject();
@@ -58,8 +53,15 @@ export const register = async ({
   return userData;
 };
 
+export const register = (input: RegisterInput) =>
+  createUser(input, "CUSTOMER");
+
+export const registerOwner = async (input: RegisterInput) => {
+  return await createUser(input, "ADMIN");
+};
+
 export const login = async ({ email, password }: LoginInput) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: email.trim().toLowerCase() });
 
   if (!user) throw new ApiError(401, "Invalid email or password");
   if (!user.isActive) throw new ApiError(403, "Account is disabled");

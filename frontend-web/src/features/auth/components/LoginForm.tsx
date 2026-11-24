@@ -37,7 +37,7 @@ export default function LoginForm() {
         {/* Title */}
         <div className="flex w-full flex-col items-start">
           <h2 className="text-xl font-semibold leading-7 text-slate-900">
-            Staff Login
+            Owner / Staff Login
           </h2>
           <p className="text-sm leading-5 text-slate-500">
             Please enter your credentials to continue.

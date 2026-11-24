@@ -295,11 +295,11 @@ export const downloadReport = async (reportId: string, res: Response) => {
   doc.moveDown(1.5);
 
   doc.font('Helvetica').fontSize(12).fillColor('#334155');
-  doc.text('Total System Revenue:', 50, doc.y, { continued: true }).text(`LKR ${preview.revenueTotal.toFixed(2)}`, { align: 'right' });
+  doc.text('Total System Revenue:', 50, doc.y, { continued: true }).text(`₱${preview.revenueTotal.toFixed(2)}`, { align: 'right' });
   doc.moveDown(0.5);
-  doc.text('Total System Expenses:', 50, doc.y, { continued: true }).text(`LKR ${preview.expenseTotal.toFixed(2)}`, { align: 'right' });
+  doc.text('Total System Expenses:', 50, doc.y, { continued: true }).text(`₱${preview.expenseTotal.toFixed(2)}`, { align: 'right' });
   doc.moveDown(0.5);
-  doc.font('Helvetica-Bold').fillColor('#10b981').text('Calculated Net Profit:', 50, doc.y, { continued: true }).text(`LKR ${preview.netProfitTotal.toFixed(2)}`, { align: 'right' });
+  doc.font('Helvetica-Bold').fillColor('#10b981').text('Calculated Net Profit:', 50, doc.y, { continued: true }).text(`₱${preview.netProfitTotal.toFixed(2)}`, { align: 'right' });
 
   doc.moveDown(4);
   doc.fillColor('#0f172a').fontSize(16).font('Helvetica-Bold').text('2. Operational Efficiency Tracker', 50, doc.y);

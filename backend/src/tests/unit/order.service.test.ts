@@ -60,6 +60,16 @@ describe('Order Service', () => {
       expect(order.status).toBe('ORDER_PLACED');
     });
 
+    it('should persist the self-service drop-off mode', async () => {
+      const order = await orderService.createOrder(userId, {
+        serviceId,
+        paymentMethod: 'COD',
+        serviceMode: 'SELF_SERVICE'
+      });
+
+      expect(order.serviceMode).toBe('SELF_SERVICE');
+    });
+
     it('should throw 404 if service does not exist', async () => {
       const fakeId = new mongoose.Types.ObjectId().toString();
       await expect(orderService.createOrder(userId, { serviceId: fakeId, paymentMethod: 'COD' }))

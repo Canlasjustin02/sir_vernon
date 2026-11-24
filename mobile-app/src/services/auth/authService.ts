@@ -9,14 +9,20 @@ export const login = async (
   const response = await api.post("/auth/login", { email, password });
   const { user, accessToken, refreshToken } = response.data.data;
 
+  return { user, accessToken, refreshToken };
+};
+
+export const persistSession = async ({
+  user,
+  accessToken,
+  refreshToken,
+}: LoginResponse): Promise<void> => {
   await AsyncStorage.setItem("accessToken", accessToken);
   await AsyncStorage.setItem("user", JSON.stringify(user));
 
   if (refreshToken) {
     await AsyncStorage.setItem("refreshToken", refreshToken);
   }
-
-  return { user, accessToken, refreshToken };
 };
 
 export const register = async (data: RegisterData): Promise<AuthUser> => {

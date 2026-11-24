@@ -1,6 +1,7 @@
 import LoginForm from "../features/auth/components/LoginForm";
 import { Lock, WashingMachine } from "lucide-react";
 import logo from "../assets/logo/logo.png";
+import { Link } from "react-router-dom";
 
 export default function LoginPage() {
   return (
@@ -22,7 +23,7 @@ export default function LoginPage() {
           </h1>
 
           <p className="pt-1 text-center text-sm text-slate-500">
-            Internal Administration Portal
+            Owner & Staff Dashboard
           </p>
         </div>
 
@@ -44,13 +45,25 @@ export default function LoginPage() {
             <div className="flex items-center justify-center gap-2">
               <Lock className="h-3.5 w-3.5 text-slate-500" />
               <p className="text-center text-[11px] font-medium uppercase tracking-[0.55px] text-slate-500">
-                Access restricted to authorized staff only
+                Access restricted to authorized owners and staff
               </p>
             </div>
           </div>
         </div>
 
         <div className="mt-8 text-center">
+          <p className="mb-3 text-sm text-slate-600">
+            Need an owner account?{" "}
+            <Link to="/owner/register" className="font-semibold text-[#2B9DEE] hover:underline">
+              Register as owner
+            </Link>
+          </p>
+          <p className="mb-3 text-sm text-slate-600">
+            Laundry customer?{" "}
+            <Link to="/customer/login" className="font-semibold text-[#2B9DEE] hover:underline">
+              Customer sign in
+            </Link>
+          </p>
           <p className="text-sm leading-5 text-slate-500">
             Having trouble logging in?
             <br />

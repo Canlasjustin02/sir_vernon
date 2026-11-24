@@ -40,7 +40,7 @@ const DeliveryConfirmationScreen = () => {
           <View style={confStyles.divider} />
           <View style={confStyles.row}>
             <Text style={confStyles.label}>Total Value</Text>
-            <Text style={confStyles.value}>Rs {parseInt(totalAmount as string || '0').toLocaleString()}</Text>
+            <Text style={confStyles.value}>₱{parseInt(totalAmount as string || '0').toLocaleString()}</Text>
           </View>
         </View>
 

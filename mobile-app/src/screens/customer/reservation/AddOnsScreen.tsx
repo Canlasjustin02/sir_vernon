@@ -79,7 +79,7 @@ const AddOnsScreen = () => {
                 <View style={styles.info}>
                     <Text style={[styles.name, isSelected && { color: COLORS.PRIMARY }]}>{item.name}</Text>
                     <Text style={styles.price}>
-                        {item.isDefault ? 'Included Free' : `+ Rs.${(item.unitPrice || 0).toFixed(2)}`}
+                        {item.isDefault ? 'Included Free' : `+ ₱${(item.unitPrice || 0).toFixed(2)}`}
                     </Text>
                 </View>
                 <View style={[styles.radio, isSelected && styles.radioActive]}>

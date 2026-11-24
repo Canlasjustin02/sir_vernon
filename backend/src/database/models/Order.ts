@@ -14,6 +14,11 @@ const orderSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    shopOwnerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     updateBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -23,6 +28,11 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Service',
       required: true,
+    },
+    serviceMode: {
+      type: String,
+      enum: ['PICKUP_DELIVERY', 'SELF_SERVICE'],
+      default: 'PICKUP_DELIVERY',
     },
     weightKg: {
       type: Number,

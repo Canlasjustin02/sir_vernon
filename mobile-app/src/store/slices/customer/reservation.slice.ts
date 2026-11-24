@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ReservationState, ReservationOption } from '../../../types/reservation.types';
 
 const initialState: ReservationState = {
+  shopOwnerId: null,
   serviceMode: null,
   serviceId: null,
   selectedOptions: [],
@@ -24,6 +25,9 @@ const reservationSlice = createSlice({
   name: 'reservation',
   initialState,
   reducers: {
+    setShopOwner: (state, action: PayloadAction<string>) => {
+      state.shopOwnerId = action.payload;
+    },
     setServiceMode: (state, action: PayloadAction<'PICKUP_DELIVERY' | 'SELF_SERVICE'>) => {
       state.serviceMode = action.payload;
     },
@@ -90,6 +94,7 @@ const reservationSlice = createSlice({
 });
 
 export const {
+  setShopOwner,
   setServiceMode,
   setServiceId,
   toggleOption,

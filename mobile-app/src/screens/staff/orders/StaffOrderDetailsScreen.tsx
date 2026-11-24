@@ -72,6 +72,9 @@ const StaffOrderDetailsScreen = () => {
 
     switch (order.status) {
       case 'ORDER_PLACED':
+        if (order.serviceMode === 'SELF_SERVICE') {
+          return { label: 'Confirm Customer Drop-off', action: () => handleStatusUpdate('HANDED_OVER'), color: COLORS.SUCCESS, icon: <CheckCircle2 size={22} color={COLORS.WHITE} /> };
+        }
         if (!order.staffId) {
           return { label: 'Claim Pickup', action: handleClaim, color: COLORS.PRIMARY, icon: <ClipboardCheck size={22} color={COLORS.WHITE} /> };
         }
@@ -103,6 +106,9 @@ const StaffOrderDetailsScreen = () => {
         return { label: 'Waiting for Laundry', action: () => {}, color: COLORS.TEXT_MUTED, icon: <Clock size={22} color={COLORS.WHITE} />, disabled: true };
 
       case 'READY':
+        if (order.serviceMode === 'SELF_SERVICE') {
+          return { label: 'Confirm Customer Pickup', action: () => handleStatusUpdate('DELIVERED'), color: COLORS.SUCCESS, icon: <CheckCircle2 size={22} color={COLORS.WHITE} /> };
+        }
         if (!order.staffId) {
           return { label: 'Claim Delivery', action: handleClaim, color: COLORS.PRIMARY, icon: <ClipboardCheck size={22} color={COLORS.WHITE} /> };
         }
@@ -197,7 +203,7 @@ const StaffOrderDetailsScreen = () => {
         <View style={redesignStyles.stepperContainer}>
           <Text style={redesignStyles.sectionLabel}>Workflow Progress</Text>
           <View style={redesignStyles.stepperRow}>
-            <Step active={true} completed={['PICKED_UP', 'HANDED_OVER', 'WASHING', 'DRYING', 'READY', 'DELIVERED', 'PICKUP_ARRIVED', 'DELIVERY_ARRIVED'].includes(order.status)} label="Pickup" />
+            <Step active={true} completed={['PICKED_UP', 'HANDED_OVER', 'WASHING', 'DRYING', 'READY', 'DELIVERED', 'PICKUP_ARRIVED', 'DELIVERY_ARRIVED'].includes(order.status)} label={order.serviceMode === 'SELF_SERVICE' ? 'Drop-off' : 'Pickup'} />
             <Connector active={['PICKED_UP', 'HANDED_OVER', 'WASHING', 'DRYING', 'READY', 'DELIVERED', 'PICKUP_ARRIVED', 'DELIVERY_ARRIVED'].includes(order.status)} />
             <Step
               active={['HANDED_OVER', 'WASHING', 'DRYING'].includes(order.status)}
@@ -205,7 +211,7 @@ const StaffOrderDetailsScreen = () => {
               label="Laundry"
             />
             <Connector active={['READY', 'DELIVERED'].includes(order.status)} />
-            <Step active={['READY', 'DELIVERY_ASSIGNED', 'DELIVERED', 'DELIVERY_ARRIVED'].includes(order.status)} completed={order.status === 'DELIVERED'} label="Delivery" />
+            <Step active={['READY', 'DELIVERY_ASSIGNED', 'DELIVERED', 'DELIVERY_ARRIVED'].includes(order.status)} completed={order.status === 'DELIVERED'} label={order.serviceMode === 'SELF_SERVICE' ? 'Customer Pickup' : 'Delivery'} />
           </View>
         </View>
 
@@ -251,18 +257,24 @@ const StaffOrderDetailsScreen = () => {
             <View style={redesignStyles.locationRow}>
               <View style={[redesignStyles.dot, { backgroundColor: COLORS.PRIMARY }]} />
               <View style={{ flex: 1 }}>
-                <Text style={redesignStyles.locationLabel}>Pickup Point</Text>
-                <Text style={redesignStyles.locationValue}>{order.pickupAddress}</Text>
+                <Text style={redesignStyles.locationLabel}>{order.serviceMode === 'SELF_SERVICE' ? 'Drop-off Location' : 'Pickup Point'}</Text>
+                <Text style={redesignStyles.locationValue}>
+                  {order.serviceMode === 'SELF_SERVICE' ? 'Customer drop-off at the laundry shop' : order.pickupAddress}
+                </Text>
               </View>
             </View>
-            <View style={redesignStyles.pathLine} />
-            <View style={redesignStyles.locationRow}>
-              <View style={[redesignStyles.dot, { backgroundColor: '#10B981' }]} />
-              <View style={{ flex: 1 }}>
-                <Text style={redesignStyles.locationLabel}>Delivery Destination</Text>
-                <Text style={redesignStyles.locationValue}>{order.deliveryAddress}</Text>
-              </View>
-            </View>
+            {order.serviceMode !== 'SELF_SERVICE' && (
+              <>
+                <View style={redesignStyles.pathLine} />
+                <View style={redesignStyles.locationRow}>
+                  <View style={[redesignStyles.dot, { backgroundColor: '#10B981' }]} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={redesignStyles.locationLabel}>Delivery Destination</Text>
+                    <Text style={redesignStyles.locationValue}>{order.deliveryAddress}</Text>
+                  </View>
+                </View>
+              </>
+            )}
           </View>
         </View>
 
@@ -286,7 +298,7 @@ const StaffOrderDetailsScreen = () => {
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={redesignStyles.detailLabel}>Estimated Payout</Text>
               <Text style={[redesignStyles.detailValue, { color: '#10B981', fontWeight: '800' }]}>
-                Rs {order.totalAmount.toLocaleString()}
+                ₱{order.totalAmount.toLocaleString()}
               </Text>
             </View>
           </View>

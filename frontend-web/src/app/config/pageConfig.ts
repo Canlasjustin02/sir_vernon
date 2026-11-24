@@ -7,9 +7,7 @@ import {
   RefreshCcw,
   MessageSquare,
   Truck,
-  BarChart3,
   Ticket,
-  Star,
   Settings2,
   CreditCard,
   Banknote,
@@ -66,11 +64,6 @@ export const pageConfig: Record<string, PageConfig> = {
     Icon: Landmark,
   },
 
-  "bank-verification": {
-    title: "Bank Transfer Verification",
-    Icon: Landmark,
-  },
-
   services: {
     title: "Services",
     Icon: WashingMachine,
@@ -106,11 +99,6 @@ export const pageConfig: Record<string, PageConfig> = {
     Icon: Ticket,
   },
 
-  loyalty: {
-    title: "Loyalty Program",
-    Icon: Star,
-  },
-
   feedbacks: {
     title: "Feedbacks",
     Icon: MessageSquare,
@@ -119,11 +107,6 @@ export const pageConfig: Record<string, PageConfig> = {
   deliveries: {
     title: "Deliveries",
     Icon: Truck,
-  },
-
-  reports: {
-    title: "Reports",
-    Icon: BarChart3,
   },
 
   profile: {

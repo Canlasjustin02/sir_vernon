@@ -14,9 +14,11 @@ export default function Index() {
   useEffect(() => {
     const prepareApp = async () => {
       try {
-        const done = await AsyncStorage.getItem("onboardingDone");
+        const [done] = await Promise.all([
+          AsyncStorage.getItem("onboardingDone"),
+          dispatch(restoreSession()),
+        ]);
         setOnboardingDone(done === "true");
-        await dispatch(restoreSession());
       } catch (error) {
         console.error("Initialization error:", error);
       } finally {

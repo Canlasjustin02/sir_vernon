@@ -19,8 +19,12 @@ export default function InventoryTable({ items, onEdit, onDelete, onReorder, onC
         const isLowStock = item.qtyInStock <= item.reorderLevel;
         return (
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${isLowStock ? "bg-rose-50 text-rose-600" : "bg-blue-50 text-blue-600"}`}>
-              <Package size={18} />
+            <div className={`w-11 h-11 rounded-lg overflow-hidden flex items-center justify-center ${isLowStock ? "bg-rose-50 text-rose-600" : "bg-blue-50 text-blue-600"}`}>
+              {item.imageUrl ? (
+                <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+              ) : (
+                <Package size={18} />
+              )}
             </div>
             <div>
               <p className="font-medium text-slate-900">{item.name}</p>
@@ -64,7 +68,7 @@ export default function InventoryTable({ items, onEdit, onDelete, onReorder, onC
       header: "Unit Price",
       cell: (item) => (
         <span className="font-semibold text-slate-900">
-          LKR {(item.unitPrice || 0).toLocaleString()}
+          ₱{(item.unitPrice || 0).toLocaleString()}
         </span>
       ),
     },

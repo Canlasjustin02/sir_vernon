@@ -97,7 +97,7 @@ export default function CategoryModal({ type, item, isOpen, onClose, onSave, loa
 
             {type === "SERVICE" && (
               <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Base Price (LKR)</label>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Base Price (₱)</label>
                 <input
                   type="number"
                   className={`w-full px-4 py-3.5 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-${colorClass}-500/20 transition font-bold text-slate-700 ${errors.price ? 'ring-2 ring-red-500/50' : ''}`}

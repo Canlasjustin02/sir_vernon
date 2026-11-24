@@ -28,7 +28,7 @@ export const CODDrawer = ({ cod, isOpen, onClose }: CODDrawerProps) => {
         <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
           <div className="p-8 bg-emerald-50 rounded-[2rem] border border-emerald-100 flex flex-col items-center gap-1 shadow-sm">
             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1">Collection Value</span>
-            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">Rs.{cod.payment?.amount?.toFixed(2)}</h3>
+            <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">₱{cod.payment?.amount?.toFixed(2)}</h3>
             <Badge variant={cod.status === 'COMPLETED' ? 'success' : 'warning'} className="mt-4 text-[9px] px-4 py-1 font-black uppercase tracking-widest rounded-full">
               {cod.status === 'COMPLETED' ? 'Settled' : 'In Progress'}
             </Badge>

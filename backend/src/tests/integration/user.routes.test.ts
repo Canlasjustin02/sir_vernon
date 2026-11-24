@@ -63,13 +63,38 @@ describe("User Integration Tests", () => {
       expect(res.body.data.length).toBeGreaterThanOrEqual(2);
     });
 
-    it("should return 403 for non-admin", async () => {
+    it("should allow customers to view available shop owners", async () => {
+      const { token: adminToken } = await createTestUser("ADMIN");
       const { token: customerToken } = await createTestUser("CUSTOMER");
+
+      await request(app)
+        .post("/api/auth/register-owner")
+        .send({
+          name: "Laundry Shop One",
+          email: "shop1@example.com",
+          telephone: "0771234567",
+          address: "Main Street",
+          password: "Test@1234",
+        });
+
+      await request(app)
+        .post("/api/auth/register-owner")
+        .send({
+          name: "Laundry Shop Two",
+          email: "shop2@example.com",
+          telephone: "0777654321",
+          address: "Market Road",
+          password: "Test@1234",
+        });
+
       const res = await request(app)
-        .get("/api/users")
+        .get("/api/users?role=ADMIN")
         .set(getAuthHeader(customerToken));
 
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(200);
+      expect(res.body.data.length).toBeGreaterThanOrEqual(2);
+      expect(res.body.data.some((shop: any) => shop.address === "Main Street")).toBe(true);
+      expect(res.body.data.some((shop: any) => shop.address === "Market Road")).toBe(true);
     });
   });
 

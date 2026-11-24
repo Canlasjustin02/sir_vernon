@@ -5,7 +5,7 @@ import ApiError from '../../../core/apiError.js';
 export const generatePayHereHash = (
   orderId: string,
   amount: number,
-  currency: string = 'LKR'
+  currency: string = 'PHP'
 ) => {
   const merchantId = (env.PAYHERE_MERCHANT_ID || '').trim();
   const merchantSecret = (env.PAYHERE_SECRET || '').trim();
@@ -84,7 +84,7 @@ export const chargeSavedCard = async (
         body: JSON.stringify({
           customer_token: customerToken,
           amount,
-          currency: 'LKR',
+          currency: 'PHP',
           order_id: orderId,
           items: items.substring(0, 50),
         }),

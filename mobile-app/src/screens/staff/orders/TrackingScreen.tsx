@@ -6,11 +6,13 @@ import MapView, { Marker, UrlTile, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
 import polyline from '@mapbox/polyline';
 import ScreenWrapper from '../../../components/common/ScreenWrapper';
+import MapAttribution from '../../../components/common/MapAttribution';
 import { COLORS } from '../../../theme/colors';
 import { staffOrderService } from '../../../services/staff/staffOrderService';
 import { notify } from '../../../utils/notify';
 import { emitStaffLocation } from '../../../services/socketService';
 import { osmService } from '../../../services/maps/osmService';
+import { MAP_TILE_MAX_ZOOM, MAP_TILE_URL } from '../../../constants/maps';
 
 const { width, height } = Dimensions.get('window');
 
@@ -48,9 +50,21 @@ const StaffTrackingScreen = () => {
         let location = await Location.getCurrentPositionAsync({});
         setStaffLocation(location.coords);
 
-        const isPickup = orderData?.status?.includes('PICKUP') || orderData?.status === 'PENDING';
-        const destLat = isPickup ? orderData?.pickupLat : orderData?.deliveryLat;
-        const destLng = isPickup ? orderData?.pickupLng : orderData?.deliveryLng;
+        let currentOrderData = orderData;
+        const onTheWayStatus = orderData.status === 'PICKUP_ASSIGNED'
+          ? 'PICKUP_ON_THE_WAY'
+          : orderData.status === 'DELIVERY_ASSIGNED'
+            ? 'DELIVERY_ON_THE_WAY'
+            : null;
+        if (onTheWayStatus) {
+          await staffOrderService.updateOrderStatus(orderId as string, onTheWayStatus);
+          currentOrderData = { ...orderData, status: onTheWayStatus };
+          setOrder(currentOrderData);
+        }
+
+        const isPickup = currentOrderData?.status?.includes('PICKUP') || currentOrderData?.status === 'PENDING';
+        const destLat = isPickup ? currentOrderData?.pickupLat : currentOrderData?.deliveryLat;
+        const destLng = isPickup ? currentOrderData?.pickupLng : currentOrderData?.deliveryLng;
 
         if (destLat && destLng) {
           const encodedPolyline = await osmService.getDirections(
@@ -93,10 +107,48 @@ const StaffTrackingScreen = () => {
     };
   }, [orderId]);
 
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const validDest =
+      destCoords && typeof destCoords.latitude === 'number' && typeof destCoords.longitude === 'number'
+        ? destCoords
+        : null;
+
+    const points = routeCoords.length > 0
+      ? routeCoords
+      : staffLocation && validDest
+        ? [{ latitude: staffLocation.latitude, longitude: staffLocation.longitude }, validDest]
+        : staffLocation
+          ? [{ latitude: staffLocation.latitude, longitude: staffLocation.longitude }]
+          : validDest
+            ? [validDest]
+            : [];
+
+    if (points.length > 0) {
+      mapRef.current.fitToCoordinates(points, {
+        edgePadding: { top: 80, right: 60, bottom: 320, left: 60 },
+        animated: true,
+      });
+    }
+  }, [routeCoords, staffLocation?.latitude, staffLocation?.longitude, destCoords?.latitude, destCoords?.longitude]);
+
   const handleCall = () => {
     if (order?.userId?.telephone) {
       Linking.openURL(`tel:${order.userId.telephone}`);
     }
+  };
+
+  const handleDirections = () => {
+    if (!destCoords?.latitude || !destCoords?.longitude) {
+      notify.error('Directions unavailable', 'Destination location is not available for this order.');
+      return;
+    }
+    const { latitude, longitude } = destCoords;
+    const label = encodeURIComponent(isPickup ? 'Pickup location' : 'Delivery location');
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&destination_place_id=&travelmode=driving`;
+    const appleUrl = `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d&q=${label}`;
+    Linking.openURL(appleUrl).catch(() => Linking.openURL(url));
   };
 
   const [isArrived, setIsArrived] = useState(false);
@@ -107,6 +159,10 @@ const StaffTrackingScreen = () => {
       await staffOrderService.notifyArrival(orderId as string);
       notify.success('Notification Sent', 'Customer has been notified of your arrival');
       setIsArrived(true);
+      setOrder((currentOrder: any) => currentOrder ? {
+        ...currentOrder,
+        status: currentOrder.status.includes('DELIVERY') ? 'DELIVERY_ARRIVED' : 'PICKUP_ARRIVED'
+      } : currentOrder);
     } catch (error: any) {
       notify.error('Error', error.message || 'Failed to notify arrival');
     } finally {
@@ -144,8 +200,8 @@ const StaffTrackingScreen = () => {
           }}
         >
           <UrlTile
-            urlTemplate="https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
-            maximumZ={19}
+            urlTemplate={MAP_TILE_URL}
+            maximumZ={MAP_TILE_MAX_ZOOM}
             flipY={false}
           />
 
@@ -175,6 +231,7 @@ const StaffTrackingScreen = () => {
             </View>
           </Marker>
         </MapView>
+        <MapAttribution style={{ left: undefined, right: 12, bottom: undefined, top: 56 }} />
       </View>
 
       <View style={trackStyles.headerOverlay}>
@@ -214,6 +271,9 @@ const StaffTrackingScreen = () => {
           </View>
           <TouchableOpacity style={trackStyles.actionBtn} onPress={handleCall}>
             <Phone size={20} color={COLORS.WHITE} fill={COLORS.WHITE} />
+          </TouchableOpacity>
+          <TouchableOpacity style={[trackStyles.actionBtn, { backgroundColor: COLORS.PRIMARY, marginLeft: 10 }]} onPress={handleDirections}>
+            <Navigation size={20} color={COLORS.WHITE} />
           </TouchableOpacity>
         </View>
 

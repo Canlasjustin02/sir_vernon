@@ -14,7 +14,8 @@ export interface InventoryItem {
   isActive: boolean;
   isDefault: boolean;
   description?: string;
-  supplierId?: string;
+  imageUrl?: string | null;
+  supplierId?: string | { _id: string; name?: string; contactPerson?: string };
   createdAt: string;
   updatedAt: string;
 }

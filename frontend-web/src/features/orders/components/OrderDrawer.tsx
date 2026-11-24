@@ -169,7 +169,7 @@ export default function OrderDrawer({
                   </div>
                   <div className="flex justify-between items-baseline pt-4 border-t border-white/10">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Grand Total</span>
-                    <span className="text-3xl font-black">LKR {order.totalAmount.toLocaleString()}</span>
+                    <span className="text-3xl font-black">₱{order.totalAmount.toLocaleString()}</span>
                   </div>
                 </section>
               </>

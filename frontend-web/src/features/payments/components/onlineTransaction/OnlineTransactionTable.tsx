@@ -46,7 +46,7 @@ export const OnlineTransactionTable = ({ data, loading, onViewDetails }: OnlineT
       header: "Amount",
       cell: (tx) => (
         <span className="font-bold text-slate-900">
-          Rs.{tx.payment?.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          ₱{tx.payment?.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </span>
       ),
     },

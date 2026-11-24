@@ -23,6 +23,21 @@ export const getOrders = async (status?: string) => {
   return apiFetch<Order[]>(`/orders${query}`);
 };
 
+export const createCustomerOrder = (data: {
+  serviceId: string;
+  shopOwnerId: string;
+  weightKg: number;
+  reservedDateTime: string;
+  pickupAddress: string;
+  deliveryAddress: string;
+  notes?: string;
+  paymentMethod: "COD";
+}) =>
+  apiFetch<Order>("/orders", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
 export const getOrderByNo = async (orderNo: string) => {
   return apiFetch<Order>(`/orders/no/${orderNo}`);
 };

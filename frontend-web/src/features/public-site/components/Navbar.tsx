@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const navLinks = [
   { name: "Home", href: "#home" },
@@ -48,9 +49,18 @@ export default function Navbar() {
                 {link.name}
               </a>
             ))}
-            <button className="bg-blue-600 text-white px-6 py-2.5 rounded-full font-semibold shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all active:scale-95">
-              Download
-            </button>
+            <Link
+              to="/customer/login"
+              className="rounded-full bg-blue-600 px-6 py-2.5 font-semibold text-white shadow-lg shadow-blue-500/30 transition-all hover:bg-blue-700 active:scale-95"
+            >
+              Customer sign in
+            </Link>
+            <Link
+              to="/login"
+              className="font-semibold text-slate-700 transition-colors hover:text-blue-600"
+            >
+              Owner / Staff
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -85,9 +95,20 @@ export default function Navbar() {
                   {link.name}
                 </a>
               ))}
-              <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-500/30">
-                Download App
-              </button>
+              <Link
+                to="/customer/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="rounded-xl bg-blue-600 px-6 py-3 text-center font-bold text-white shadow-lg shadow-blue-500/30"
+              >
+                Customer sign in
+              </Link>
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-center font-semibold text-slate-700"
+              >
+                Owner / Staff sign in
+              </Link>
             </div>
           </motion.div>
         )}

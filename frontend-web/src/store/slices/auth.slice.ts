@@ -61,6 +61,12 @@ const authSlice = createSlice({
       state.refreshToken = action.payload.refreshToken;
     },
 
+    updateAuthUser(state, action: PayloadAction<Partial<AuthUser>>) {
+      if (state.user) {
+        Object.assign(state.user, action.payload);
+      }
+    },
+
     // load from storage on app start
     hydrateAuth(
       state,
@@ -90,6 +96,7 @@ export const {
   loginSuccess,
   loginFail,
   setTokens,
+  updateAuthUser,
   hydrateAuth,
   logout,
 } = authSlice.actions;

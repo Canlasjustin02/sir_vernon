@@ -5,12 +5,12 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StatusBar,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -21,6 +21,7 @@ import { ROUTES } from "../../../../src/constants/routes";
 import { COLORS } from "../../../../src/theme/colors";
 
 import AuthHeader from "./components/AuthHeader";
+import AuthRoleTabs from "./components/AuthRoleTabs";
 import { authSharedStyles } from "./styles/auth.shared.styles";
 import { loginStyles } from "./styles/login.styles";
 import { loginSchema } from "../../../validation/auth.schema";
@@ -36,6 +37,7 @@ export default function LoginScreen() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [activeRole, setActiveRole] = useState<"customer" | "owner">("customer");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -81,7 +83,8 @@ export default function LoginScreen() {
       loginUser({
         email: email.trim().toLowerCase(),
         password,
-      } as any)
+        expectedRole: activeRole === "owner" ? "OWNER" : "CUSTOMER",
+      })
     );
 
     if (loginUser.rejected.match(resultAction)) {
@@ -91,7 +94,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={authSharedStyles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.BACKGROUND} />
+      <StatusBar style="dark" />
 
       <KeyboardAvoidingView
         style={authSharedStyles.keyboardWrapper}
@@ -107,6 +110,13 @@ export default function LoginScreen() {
               title="Welcome Back"
               subtitle="Please enter your details to sign in"
               icon="washing-machine"
+            />
+            <AuthRoleTabs
+              activeTab={activeRole}
+              onChange={(role) => {
+                setActiveRole(role);
+                dispatch(clearAuthError());
+              }}
             />
             <View style={authSharedStyles.form}>
               <View style={authSharedStyles.inputGroup}>

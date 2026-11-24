@@ -92,7 +92,7 @@ const CashOnDeliveryScreen = () => {
         <View style={[styles.card, { borderStyle: 'dotted' }]}>
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Service Fee</Text>
-            <Text style={styles.priceValue}>Rs {total || '0.00'}</Text>
+            <Text style={styles.priceValue}>₱{total || '0.00'}</Text>
           </View>
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Delivery Fee</Text>
@@ -100,7 +100,7 @@ const CashOnDeliveryScreen = () => {
           </View>
           <View style={[styles.totalRow, { paddingTop: 12, marginTop: 4 }]}>
             <Text style={[styles.totalLabel, { fontSize: 16 }]}>Total Amount</Text>
-            <Text style={[styles.totalValue, { fontSize: 20 }]}>Rs {total || '0.00'}</Text>
+            <Text style={[styles.totalValue, { fontSize: 20 }]}>₱{total || '0.00'}</Text>
           </View>
         </View>
 

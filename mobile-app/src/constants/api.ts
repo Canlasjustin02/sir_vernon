@@ -3,6 +3,9 @@ export const API_CONFIG = {
   TIMEOUT: 10000,
 } as const;
 
+export const getApiBaseUrlLabel = (): string =>
+  API_CONFIG.BASE_URL || "(missing EXPO_PUBLIC_API_BASE_URL)";
+
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',

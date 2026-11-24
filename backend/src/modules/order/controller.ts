@@ -12,18 +12,27 @@ export const updateOrderStatus = asyncHandler(async (req: Request, res: Response
   const result = await service.updateOrderStatus(
     req.params.id as string,
     req.body.status,
-    (req as any).user.id
+    (req as any).user.id,
+    (req as any).user.role
   );
   return ApiResponse(res, 200, 'Order status updated successfully', result);
 });
 
 export const claimOrder = asyncHandler(async (req: Request, res: Response) => {
-  const result = await service.claimOrder(req.params.id as string, (req as any).user.id);
+  const result = await service.claimOrder(
+    req.params.id as string,
+    (req as any).user.id,
+    (req as any).user.role
+  );
   return ApiResponse(res, 200, 'Order claimed successfully', result);
 });
 
 export const getAvailableOrders = asyncHandler(async (req: Request, res: Response) => {
-  const result = await service.getAvailableOrders(req.query);
+  const result = await service.getAvailableOrders(
+    req.query,
+    (req as any).user.id,
+    (req as any).user.role
+  );
   return ApiResponse(res, 200, 'Available orders fetched successfully', result);
 });
 
@@ -38,7 +47,11 @@ export const notifyArrival = asyncHandler(async (req: Request, res: Response) =>
 });
 
 export const getOrderById = asyncHandler(async (req: Request, res: Response) => {
-  const result = await service.getOrderById(req.params.id as string);
+  const result = await service.getOrderById(
+    req.params.id as string,
+    (req as any).user.id,
+    (req as any).user.role
+  );
   return ApiResponse(res, 200, 'Order fetched successfully', result);
 });
 
@@ -48,7 +61,11 @@ export const getMyOrders = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const getAllOrders = asyncHandler(async (req: Request, res: Response) => {
-  const result = await service.getAllOrders(req.query);
+  const result = await service.getAllOrders(
+    req.query,
+    (req as any).user.id,
+    (req as any).user.role
+  );
   return ApiResponse(res, 200, 'All orders fetched successfully', result);
 });
 
@@ -67,11 +84,20 @@ export const cancelOrder = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const updateOrder = asyncHandler(async (req: Request, res: Response) => {
-  const result = await service.updateAnyOrder(req.params.id as string, req.body);
+  const result = await service.updateAnyOrder(
+    req.params.id as string,
+    req.body,
+    (req as any).user.id,
+    (req as any).user.role
+  );
   return ApiResponse(res, 200, 'Order updated successfully', result);
 });
 
 export const deleteOrder = asyncHandler(async (req: Request, res: Response) => {
-  await service.softDeleteOrder(req.params.id as string);
+  await service.softDeleteOrder(
+    req.params.id as string,
+    (req as any).user.id,
+    (req as any).user.role
+  );
   return ApiResponse(res, 200, 'Order deleted successfully (Soft delete)');
 });

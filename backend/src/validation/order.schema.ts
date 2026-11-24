@@ -5,6 +5,8 @@ const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ID format"
 
 export const createOrderSchema = z.object({
   serviceId: objectIdSchema,
+  shopOwnerId: objectIdSchema.optional(),
+  serviceMode: z.enum(['PICKUP_DELIVERY', 'SELF_SERVICE']).default('PICKUP_DELIVERY'),
   weightKg: z.coerce.number().min(0).optional().nullable(),
   reservedDateTime: z.string().datetime().optional().nullable(),
   pickupAddress: z.string().optional().nullable(),

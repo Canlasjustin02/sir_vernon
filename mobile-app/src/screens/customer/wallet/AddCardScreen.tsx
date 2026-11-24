@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     loaderContainer: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         backgroundColor: '#F1F5F9',
         justifyContent: 'center',
         alignItems: 'center',
