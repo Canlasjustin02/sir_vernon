@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const notificationSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -32,4 +31,4 @@ const notificationSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('Notification', notificationSchema);
+export default mongoose.model('Notification', notificationSchema);

@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const systemSettingSchema = new mongoose.Schema({
     key: {
         type: String,
@@ -15,4 +14,4 @@ const systemSettingSchema = new mongoose.Schema({
         type: String
     }
 }, { timestamps: true });
-export default createTenantModel('SystemSetting', systemSettingSchema);
+export default mongoose.model('SystemSetting', systemSettingSchema);

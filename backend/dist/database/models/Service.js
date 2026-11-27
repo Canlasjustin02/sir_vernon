@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 import { UNITS } from '../../core/constants.js';
 const serviceSchema = new mongoose.Schema({
     categoryId: {
@@ -52,4 +51,4 @@ const serviceSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('Service', serviceSchema);
+export default mongoose.model('Service', serviceSchema);

@@ -176,7 +176,7 @@ export async function initCardPayment(orderId, userId, saveCard = false) {
     await order.save();
     const merchantId = (process.env.PAYHERE_MERCHANT_ID || '').trim();
     const merchantSecret = (process.env.PAYHERE_SECRET || '').trim();
-    const currency = 'LKR';
+    const currency = 'PHP';
     const amountFormatted = order.totalAmount.toFixed(2);
     const secretHash = crypto.createHash('md5').update(merchantSecret).digest('hex').toUpperCase();
     const rawData = merchantId + reference + amountFormatted + currency + secretHash;

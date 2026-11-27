@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const savedCardSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -43,4 +42,4 @@ const savedCardSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('SavedCard', savedCardSchema);
+export default mongoose.model('SavedCard', savedCardSchema);

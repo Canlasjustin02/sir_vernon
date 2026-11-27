@@ -61,7 +61,7 @@ Customers register or log in through the Expo mobile app, place laundry orders, 
 
 ### Shared Accounts and Database
 
-The web dashboard and mobile app use the same Express API and MongoDB database. Configure the database once with `MONGO_URI` in `backend/.env`; set `EXPO_PUBLIC_API_BASE_URL` in `mobile-app/.env` to the reachable backend URL (for a physical phone, use the computer's LAN IP rather than `localhost`). Public registration creates customer accounts only. Owners and staff sign in with accounts provisioned by an administrator; the web dashboard is for owners and staff, while mobile login supports both owner/staff and customer accounts.
+The web dashboard and mobile app use the same Express API and MongoDB database. Configure the database with `MONGODB_URI` in `backend/.env` (the legacy `MONGO_URI` name is also supported); set `EXPO_PUBLIC_API_BASE_URL` in `mobile-app/.env` to the reachable backend URL (for a physical phone, use the computer's LAN IP rather than `localhost`). Public registration creates customer accounts only. Owners and staff sign in with accounts provisioned by an administrator; the web dashboard is for owners and staff, while mobile login supports both owner/staff and customer accounts.
 
 The web customer portal provides separate customer sign-in and registration pages. The owner registration page creates only the initial owner account; further public owner registrations are rejected. Registration accepts Philippine mobile numbers (`09XXXXXXXXX` or `+639XXXXXXXXX`) and Sri Lankan mobile numbers (`07XXXXXXXX` or `+947XXXXXXXX`).
 

@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import env from '../../../config/env.js';
 import ApiError from '../../../core/apiError.js';
-export const generatePayHereHash = (orderId, amount, currency = 'LKR') => {
+export const generatePayHereHash = (orderId, amount, currency = 'PHP') => {
     const merchantId = (env.PAYHERE_MERCHANT_ID || '').trim();
     const merchantSecret = (env.PAYHERE_SECRET || '').trim();
     if (!merchantId || !merchantSecret) {
@@ -53,7 +53,7 @@ export const chargeSavedCard = async (customerToken, amount, orderId, items = 'L
             body: JSON.stringify({
                 customer_token: customerToken,
                 amount,
-                currency: 'LKR',
+                currency: 'PHP',
                 order_id: orderId,
                 items: items.substring(0, 50),
             }),

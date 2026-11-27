@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const loyaltyTierSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -33,4 +32,4 @@ const loyaltyTierSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('LoyaltyTier', loyaltyTierSchema);
+export default mongoose.model('LoyaltyTier', loyaltyTierSchema);

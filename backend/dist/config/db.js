@@ -5,7 +5,7 @@ mongoose.set("strictQuery", true);
 export const connectDB = async () => {
     try {
         if (!config.MONGO_URI) {
-            throw new Error("MONGO_URI is missing in environment config");
+            throw new Error("MONGODB_URI (or legacy MONGO_URI) is missing in environment config");
         }
         if (mongoose.connection.readyState === 1) {
             logger.warn("MongoDB already connected");

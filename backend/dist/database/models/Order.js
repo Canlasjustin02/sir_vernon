@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 import { BANK_VERIFICATION_STATUS } from '../../core/constants.js';
 const orderSchema = new mongoose.Schema({
     orderNo: {
@@ -137,4 +136,4 @@ const orderSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('Order', orderSchema);
+export default mongoose.model('Order', orderSchema);

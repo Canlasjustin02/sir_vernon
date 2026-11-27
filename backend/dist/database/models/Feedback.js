@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 import { FEEDBACK_STATUS, FEEDBACK_TAGS } from '../../core/constants.js';
 const feedbackSchema = new mongoose.Schema({
     orderId: {
@@ -42,4 +41,4 @@ const feedbackSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('Feedback', feedbackSchema);
+export default mongoose.model('Feedback', feedbackSchema);

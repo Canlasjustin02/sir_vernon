@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const supplierSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -40,4 +39,4 @@ const supplierSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('Supplier', supplierSchema);
+export default mongoose.model('Supplier', supplierSchema);

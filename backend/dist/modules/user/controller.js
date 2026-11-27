@@ -38,25 +38,23 @@ export const getUsers = asyncHandler(async (req, res) => {
         role: role,
         isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
         search: search,
-        viewerId: req.user.id,
-        viewerRole: req.user.role,
     };
     const result = await service.getUsers(filters);
     return ApiResponse(res, 200, 'Users fetched successfully', result);
 });
 export const createUser = asyncHandler(async (req, res) => {
-    const result = await service.createUser(req.body, req.user.id);
+    const result = await service.createUser(req.body);
     return ApiResponse(res, 201, 'User created successfully', result);
 });
 export const getUserById = asyncHandler(async (req, res) => {
-    const result = await service.getUserById(req.params.id, req.user.id);
+    const result = await service.getUserById(req.params.id);
     return ApiResponse(res, 200, 'User fetched successfully', result);
 });
 export const updateUser = asyncHandler(async (req, res) => {
-    const result = await service.updateAnyUser(req.params.id, req.body, req.user.id);
+    const result = await service.updateAnyUser(req.params.id, req.body);
     return ApiResponse(res, 200, 'User updated successfully', result);
 });
 export const deleteUser = asyncHandler(async (req, res) => {
-    const result = await service.softDeleteUser(req.params.id, req.user.id);
+    const result = await service.softDeleteUser(req.params.id);
     return ApiResponse(res, 200, 'User deleted successfully (Soft delete)', result);
 });

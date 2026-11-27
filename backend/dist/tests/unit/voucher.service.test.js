@@ -51,7 +51,7 @@ describe('Voucher Service', () => {
                 isActive: true
             });
             await expect(voucherService.validateVoucher('MIN500', userId, 400))
-                .rejects.toThrow('Minimum order amount for this voucher is LKR 500');
+                .rejects.toThrow('Minimum order amount for this voucher is ₱500');
         });
         it('should block non-bronze members from using vouchers', async () => {
             const goldUser = await User.create({

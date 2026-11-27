@@ -1,6 +1,8 @@
 import * as service from './service.js';
 import asyncHandler from '../../utils/asyncHandler.js';
 import { ApiResponse } from '../../core/apiResponse.js';
+import ApiError from '../../core/apiError.js';
+import { uploadToCloudinary } from '../../utils/cloudinary.js';
 export const createInventory = asyncHandler(async (req, res) => {
     const result = await service.createInventory(req.body);
     return ApiResponse(res, 201, 'Inventory item created successfully', result);
@@ -32,4 +34,12 @@ export const markOrdered = asyncHandler(async (req, res) => {
 export const confirmRestock = asyncHandler(async (req, res) => {
     const result = await service.confirmRestock(req.params.id, req.body?.qty);
     return ApiResponse(res, 200, 'Stock replenished successfully', result);
+});
+export const uploadInventoryImage = asyncHandler(async (req, res) => {
+    if (!req.file) {
+        throw new ApiError(400, 'Please upload an image file');
+    }
+    const imageUrl = await uploadToCloudinary(req.file.buffer, 'inventory');
+    const result = await service.updateInventory(req.params.id, { imageUrl });
+    return ApiResponse(res, 200, 'Inventory image uploaded successfully', result);
 });

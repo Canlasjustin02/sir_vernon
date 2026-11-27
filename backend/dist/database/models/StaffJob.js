@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const staffJobSchema = new mongoose.Schema({
     orderId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -32,4 +31,4 @@ const staffJobSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('StaffJob', staffJobSchema);
+export default mongoose.model('StaffJob', staffJobSchema);

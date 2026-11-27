@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const qrCodeSchema = new mongoose.Schema({
     orderId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -33,4 +32,4 @@ const qrCodeSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('QRCode', qrCodeSchema);
+export default mongoose.model('QRCode', qrCodeSchema);

@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const stockMovementSchema = new mongoose.Schema({
     itemId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -32,4 +31,4 @@ const stockMovementSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('StockMovement', stockMovementSchema);
+export default mongoose.model('StockMovement', stockMovementSchema);

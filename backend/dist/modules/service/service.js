@@ -1,7 +1,6 @@
 import Service from '../../database/models/Service.js';
 import ServiceCategory from '../../database/models/ServiceCategory.js';
 import ApiError from '../../core/apiError.js';
-import { getCurrentShopOwnerId } from '../../database/tenantContext.js';
 export const createService = async (input) => {
     const service = await Service.create(input);
     return service;
@@ -64,15 +63,4 @@ export const getAllServices = async (query) => {
 };
 export const getServicesByCategory = async (categoryId) => {
     return await Service.find({ categoryId }).sort({ name: 1 });
-};
-export const getManagedServices = async (query) => {
-    const result = await getAllServices(query);
-    const ownerId = getCurrentShopOwnerId();
-    return {
-        ...result,
-        items: result.items.map((service) => ({
-            ...service,
-            ownerId,
-        })),
-    };
 };

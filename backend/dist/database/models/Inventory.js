@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 import { UNITS } from '../../core/constants.js';
 const inventorySchema = new mongoose.Schema({
     categoryName: {
@@ -65,6 +64,11 @@ const inventorySchema = new mongoose.Schema({
         trim: true,
         default: null,
     },
+    imageUrl: {
+        type: String,
+        trim: true,
+        default: null,
+    },
     supplierId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Supplier',
@@ -73,4 +77,4 @@ const inventorySchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('Inventory', inventorySchema);
+export default mongoose.model('Inventory', inventorySchema);

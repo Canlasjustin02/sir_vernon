@@ -21,10 +21,6 @@ export const getAllServices = asyncHandler(async (req, res) => {
     const result = await service.getAllServices(req.query);
     return ApiResponse(res, 200, 'All services fetched successfully', result);
 });
-export const getManagedServices = asyncHandler(async (req, res) => {
-    const result = await service.getManagedServices(req.query);
-    return ApiResponse(res, 200, 'Managed services fetched successfully', result);
-});
 export const getServicesByCategory = asyncHandler(async (req, res) => {
     const result = await service.getServicesByCategory(req.params.categoryId);
     return ApiResponse(res, 200, `Services for category ${req.params.categoryId} fetched successfully`, result);

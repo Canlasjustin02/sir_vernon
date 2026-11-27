@@ -98,7 +98,7 @@ export const markAsOrdered = async (id, qty) => {
         `This is an official purchase order from ${managementName} for the following item:\n\n` +
         `Item: ${item.name}\n` +
         `Quantity: ${qty} ${item.unit}\n\n` +
-        `Please confirm receipt of this order and reply with an estimated delivery time within 24 hours.\n\n` +
+        `Please confirm receipt of this order and reply with an estimated delivery time within 24 hours\n\n` +
         `Best Regards,\n` +
         `${managementName}`;
     if (supplier?.email) {

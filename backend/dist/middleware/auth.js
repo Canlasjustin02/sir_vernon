@@ -1,6 +1,5 @@
 import { verifyAccessToken } from "../utils/jwt.js";
 import User from "../database/models/User.js";
-import tenantScope from "./tenantScope.js";
 export const auth = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
@@ -24,14 +23,7 @@ export const auth = async (req, res, next) => {
             role: user.role,
             email: user.email,
         };
-        const sharedAccountRoute = req.originalUrl.startsWith("/api/users") ||
-            req.originalUrl.startsWith("/api/auth") ||
-            req.originalUrl.startsWith("/api/status");
-        if (sharedAccountRoute) {
-            next();
-            return;
-        }
-        tenantScope(req, res, next);
+        next();
     }
     catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";

@@ -1,16 +1,13 @@
 import { Router } from 'express';
 import { auth } from '../../middleware/auth.js';
-import tenantScope from '../../middleware/tenantScope.js';
 import { allowRoles } from '../../middleware/role.js';
 import { ROLES } from '../../core/constants.js';
 import { validateBody, validateParams } from '../../middleware/validate.js';
 import * as controller from './controller.js';
 import { createServiceSchema, updateServiceSchema, serviceIdParamSchema } from '../../validation/service.schema.js';
 const router = Router();
-router.use(tenantScope);
 router.get('/', controller.getAllServices);
 router.get('/category/:categoryId', controller.getServicesByCategory);
-router.get('/manage', auth, allowRoles(ROLES.ADMIN, ROLES.STAFF), controller.getManagedServices);
 router.get('/:id', validateParams(serviceIdParamSchema), controller.getServiceById);
 router.use(auth, allowRoles(ROLES.ADMIN, ROLES.STAFF));
 router.post('/', validateBody(createServiceSchema), controller.createService);

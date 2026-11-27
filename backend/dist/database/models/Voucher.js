@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const voucherSchema = new mongoose.Schema({
     code: {
         type: String,
@@ -61,4 +60,4 @@ const voucherSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('Voucher', voucherSchema);
+export default mongoose.model('Voucher', voucherSchema);

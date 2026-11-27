@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const voucherRedemptionSchema = new mongoose.Schema({
     voucherId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -28,4 +27,4 @@ const voucherRedemptionSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('VoucherRedemption', voucherRedemptionSchema);
+export default mongoose.model('VoucherRedemption', voucherRedemptionSchema);

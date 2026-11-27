@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 import { BANK_VERIFICATION_STATUS, OCR_STATUS } from '../../core/constants.js';
 const bankTransferSchema = new mongoose.Schema({
     paymentId: {
@@ -111,4 +110,4 @@ const bankTransferSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('BankTransfer', bankTransferSchema);
+export default mongoose.model('BankTransfer', bankTransferSchema);

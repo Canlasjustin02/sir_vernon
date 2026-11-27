@@ -12,25 +12,15 @@ import { generateOrderNo } from '../../utils/reference.js';
 import * as voucherService from '../voucher/service.js';
 import * as loyaltyService from '../loyalty/loyalty.service.js';
 import { createNotification } from '../notification/service.js';
-import { getCurrentShopOwnerId } from '../../database/tenantContext.js';
 export const createOrder = async (userId, input) => {
-    const currentShopOwnerId = getCurrentShopOwnerId();
-    if (!currentShopOwnerId) {
-        throw new ApiError(400, 'Select a shop before placing an order');
-    }
-    if (input.shopOwnerId && input.shopOwnerId !== currentShopOwnerId) {
-        throw new ApiError(403, 'The selected shop does not match this request');
-    }
     const service = await Service.findById(input.serviceId);
     if (!service) {
         throw new ApiError(404, 'Service not found');
     }
-    const shopOwner = await User.findOne({
-        _id: currentShopOwnerId,
-        role: ROLES.ADMIN,
-        isActive: true,
-    });
-    if (!shopOwner) {
+    const shopOwner = input.shopOwnerId
+        ? await User.findOne({ _id: input.shopOwnerId, role: ROLES.ADMIN, isActive: true })
+        : null;
+    if (input.shopOwnerId && !shopOwner) {
         throw new ApiError(404, 'Laundry shop not found');
     }
     const subtotal = service.price * (input.weightKg || 1);
@@ -65,7 +55,7 @@ export const createOrder = async (userId, input) => {
     const order = await Order.create({
         orderNo,
         userId,
-        shopOwnerId: shopOwner._id,
+        shopOwnerId: shopOwner?._id ?? null,
         serviceId: input.serviceId,
         serviceMode: input.serviceMode || 'PICKUP_DELIVERY',
         weightKg: input.weightKg,
@@ -490,15 +480,15 @@ export const generateReceiptPdf = async (id) => {
             .font('Helvetica')
             .text(order.serviceId?.name || 'Laundry Service', 50, position)
             .text(`${order.weightKg || 1} kg`, 280, position, { width: 90, align: 'right' })
-            .text(`LKR ${(order.subtotal / (order.weightKg || 1)).toFixed(2)}`, 370, position, { width: 90, align: 'right' })
-            .text(`LKR ${order.subtotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
+            .text(`₱${(order.subtotal / (order.weightKg || 1)).toFixed(2)}`, 370, position, { width: 90, align: 'right' })
+            .text(`₱${order.subtotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
         if (order.options && order.options.length > 0) {
             order.options.forEach((opt) => {
                 position += 20;
                 doc
                     .fontSize(9)
                     .text(`+ ${opt.name} (${opt.categoryName})`, 70, position)
-                    .text(`LKR ${opt.price.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
+                    .text(`₱${opt.price.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
             });
         }
         position += 30;
@@ -510,21 +500,21 @@ export const generateReceiptPdf = async (id) => {
         doc
             .fontSize(10)
             .text('Subtotal:', 350, position)
-            .text(`LKR ${order.subtotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
+            .text(`₱${order.subtotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
         position += 15;
         doc
             .text('Extra Fees:', 350, position)
-            .text(`LKR ${order.extraFee.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
+            .text(`₱${order.extraFee.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
         position += 15;
         doc
             .text('Delivery Fee:', 350, position)
-            .text(`LKR ${order.deliveryFee.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
+            .text(`₱${order.deliveryFee.toFixed(2)}`, 480, position, { width: 50, align: 'right' });
         if ((order.discountTotal || 0) > 0) {
             position += 15;
             doc
                 .fillColor('#EE5555')
                 .text('Discount:', 350, position)
-                .text(`- LKR ${order.discountTotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' })
+                .text(`- ₱${order.discountTotal.toFixed(2)}`, 480, position, { width: 50, align: 'right' })
                 .fillColor('#000000');
         }
         position += 20;
@@ -532,7 +522,7 @@ export const generateReceiptPdf = async (id) => {
             .font('Helvetica-Bold')
             .fontSize(14)
             .text('TOTAL:', 350, position)
-            .text(`LKR ${order.totalAmount.toFixed(2)}`, 450, position, { width: 100, align: 'right' });
+            .text(`₱${order.totalAmount.toFixed(2)}`, 450, position, { width: 100, align: 'right' });
         doc
             .font('Helvetica')
             .fontSize(10)

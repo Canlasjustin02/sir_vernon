@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const loyaltyTransactionSchema = new mongoose.Schema({
     loyaltyId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -31,4 +30,4 @@ const loyaltyTransactionSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('LoyaltyTransaction', loyaltyTransactionSchema);
+export default mongoose.model('LoyaltyTransaction', loyaltyTransactionSchema);

@@ -27,11 +27,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
-    shopOwnerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        default: null,
-    },
     address: {
         type: String,
         trim: true,

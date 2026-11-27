@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 import { PAYMENT_METHODS, PAYMENT_STATUS } from '../../core/constants.js';
 const paymentSchema = new mongoose.Schema({
     orderId: {
@@ -45,4 +44,4 @@ const paymentSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('Payment', paymentSchema);
+export default mongoose.model('Payment', paymentSchema);

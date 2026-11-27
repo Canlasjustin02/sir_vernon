@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const revenueSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -23,4 +22,4 @@ const revenueSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('Revenue', revenueSchema);
+export default mongoose.model('Revenue', revenueSchema);

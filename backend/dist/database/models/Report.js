@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { createTenantModel } from '../tenantContext.js';
 const reportSchema = new mongoose.Schema({
     reportCode: {
         type: String,
@@ -28,4 +27,4 @@ const reportSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
-export default createTenantModel('Report', reportSchema);
+export default mongoose.model('Report', reportSchema);
