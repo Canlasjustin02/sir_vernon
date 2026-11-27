@@ -4,5 +4,7 @@ export const env = {
 };
 
 if (!env.API_URL) {
-  throw new Error("VITE_API_BASE_URL is missing in .env");
+  throw new Error(
+    "VITE_API_BASE_URL is required. Set it in the frontend environment, including Vercel Environment Variables for deployments."
+  );
 }
