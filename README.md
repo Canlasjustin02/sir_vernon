@@ -63,6 +63,19 @@ Customers register or log in through the Expo mobile app, place laundry orders, 
 
 The web dashboard and mobile app use the same Express API and MongoDB database. Configure the database with `MONGODB_URI` in `backend/.env` (the legacy `MONGO_URI` name is also supported); set `EXPO_PUBLIC_API_BASE_URL` in `mobile-app/.env` to the reachable backend URL (for a physical phone, use the computer's LAN IP rather than `localhost`). Public registration creates customer accounts only. Owners and staff sign in with accounts provisioned by an administrator; the web dashboard is for owners and staff, while mobile login supports both owner/staff and customer accounts.
 
+### Production Deployment
+
+Deploy `frontend-web` to Vercel with its Root Directory set to `frontend-web`. Set the Vercel environment variable `VITE_API_BASE_URL` to the backend URL ending in `/api`, for example `https://<backend-host>/api`.
+
+Deploy `backend` as a long-running Node/Docker web service (for example, a Render Web Service using `backend/Dockerfile`). The backend starts Express and Socket.IO as a persistent server, so selecting `backend` as a Vercel Root Directory alone is not sufficient. Set these variables on the backend host:
+
+- `MONGODB_URI`: the Atlas connection URI (the backend also accepts legacy `MONGO_URI`)
+- `MONGO_DB_NAME`: the database name, if not `test`
+- `JWT_SECRET` and `JWT_REFRESH_SECRET`: separate, newly generated secrets
+- `NODE_ENV=production`
+
+The Vercel-MongoDB integration adds variables to Vercel projects; it does not forward them to a backend hosted elsewhere. Add `MONGODB_URI` privately to the backend host's environment settings as well. Do not put database credentials in frontend variables or source files. Allow the backend host to reach Atlas, restricting Atlas network access to the host's outbound addresses where possible.
+
 The web customer portal provides separate customer sign-in and registration pages. The owner registration page creates only the initial owner account; further public owner registrations are rejected. Registration accepts Philippine mobile numbers (`09XXXXXXXXX` or `+639XXXXXXXXX`) and Sri Lankan mobile numbers (`07XXXXXXXX` or `+947XXXXXXXX`).
 
 ---
